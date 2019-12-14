@@ -1,4 +1,5 @@
 import ast
+from typing import Optional
 from setuptools import setup, find_packages
 from Cython.Build import cythonize
 

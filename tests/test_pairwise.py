@@ -10,8 +10,8 @@ from pairwise_manhattan import (
     pairwise_manhattan_numpy_v2,
     pairwise_manhattan_numpy_v3,
     pairwise_manhattan_numpy_v4,
+    pairwise_manhattan_cython,
 )
-from pairwise_manhattan_cython import pairwise_manhattan_cython
 
 
 CENTERS = [
@@ -32,7 +32,7 @@ def points():
 
 def test_pairwise_manhattan():
     res = pairwise_manhattan_python_v1(CENTERS)
-    assert res == gold
+    assert res == DISTS
 
 
 def test_pairwise_manhattan_zeros_on_diag(points):
@@ -45,7 +45,7 @@ def test_pairwise_manhattan_symmetric(points):
     dists = pairwise_manhattan_python_v1(points)
     for i in range(len(dists)):
         for j in range(len(dists)):
-            assert dists[i][j] == dist[j][i]
+            assert dists[i][j] == dists[j][i]
 
 
 def test_pairwise_manhattan_all_equal(points):
