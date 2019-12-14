@@ -1,2 +1,5 @@
 matplotlib
 pandas
+jupyter
+notebook
+scipy

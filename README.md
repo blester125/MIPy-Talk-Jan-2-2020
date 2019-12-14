@@ -11,6 +11,7 @@ Normally I would suggest installing via `setup.py` but doing this makes it diffi
 
 ```
 conda install --file requirements.txt
+conda install --file requirements-dev.txt
 ```
 
 Once you have the requirements installed you can install this package to make it accessible in scripts.
