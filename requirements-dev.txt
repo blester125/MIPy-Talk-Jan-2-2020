@@ -3,3 +3,4 @@ pandas
 jupyter
 notebook
 scipy
+cython

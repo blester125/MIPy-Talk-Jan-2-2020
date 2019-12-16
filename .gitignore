@@ -6,3 +6,4 @@ build/*
 *.so
 *.c
 **/.ipynb_checkpoints
+.python-version

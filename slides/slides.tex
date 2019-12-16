@@ -1,0 +1,171 @@
+\documentclass{beamer}
+
+\usefonttheme[onlymath]{serif}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{array}
+\usepackage{graphicx}
+\usepackage{mathtools}
+\usepackage{minted}
+\usemintedstyle{manni}
+\newminted{python}{fontsize=\footnotesize}
+\newminted{cython}{fontsize=\footnotesize}
+
+\usetheme{Pittsburgh}
+% \beamertemplatenavigationsymbolsempty
+
+\usepackage{pgfpages}
+\setbeamertemplate{note page}{\pagecolor{yellow!5}\insertnote}
+\setbeameroption{show notes on second screen=right}
+
+\title{Crunching Numbers with NumPy and Cython}
+\author{Brian Lester}
+\institute{interactions}
+\date{\today}
+
+\begin{document}
+
+\def\R{\mathbb{R}}
+\frame{\titlepage}
+
+\begin{frame}[fragile]
+\frametitle{Python v1}
+
+    \begin{pythoncode}
+def pairwise_manhattan_python_v1(
+    points: List[List[int]]
+) -> List[List[int]]:
+    results = []
+    # For each pair of points
+    for i in range(len(points)):
+        dist_i_j = []
+        for j in range(len(points)):
+            # Manhattan distance
+            dist_i_j.append(
+                sum(abs(p1 - p2) for p1, p2 in zip(points[i], points[j]))
+            )
+        results.append(dist_i_j)
+    return results
+    \end{pythoncode}
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Python v2}
+
+    \begin{pythoncode}
+def pairwise_manhattan_python_v2(
+    points: List[List[int]]
+) -> List[List[int]]:
+    # Preallocate the results
+    results = [[None] * len(points) for _ in range(len(points))]
+    # Look at every pair of you and the ones after you, distances
+    # with points before you were calculated when they looked at you
+    for i in range(len(points)):
+        for j in range(i, len(points)):
+            # Manhattan distance calculation
+            dist = sum(
+                abs(p1 - p2) for p1, p2 in zip(points[i], points[j])
+            )
+            # Manhattan distance is symmetric
+            results[i][j] = dist
+            results[j][i] = dist
+    return results
+    \end{pythoncode}
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Numpy v1}
+
+    \begin{pythoncode}
+def pairwise_manhattan_numpy_v1(
+    points: List[np.ndarray]
+) -> np.ndarray:
+    results = np.zeros((len(points), len(points)), dtype=np.int32)
+    for i in range(len(points)):
+        for j in range(len(points)):
+            results[i, j] = np.sum(np.abs(points[i] - points[j]))
+    return results
+    \end{pythoncode}
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Numpy v2}
+
+    \begin{pythoncode}
+def pairwise_manhattan_numpy_v2(
+    points: List[np.ndarray]
+) -> np.ndarray:
+    results = np.zeros((len(points), len(points)), dtype=np.int32)
+    for i in range(len(points)):
+        for j in range(i, len(points)):
+            dist = np.sum(np.abs(points[i] - points[j]))
+            results[i, j] = dist
+            results[j, i] = dist
+    return results
+    \end{pythoncode}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Numpy v3}
+
+    \begin{pythoncode}
+def pairwise_manhattan_numpy_v3(points: np.ndarray) -> np.ndarray:
+    results = []
+    for i in range(len(points)):
+        results.append(np.sum(np.abs(points[i] - points), axis=-1))
+    return np.stack(results)
+
+    \end{pythoncode}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Numpy v4}
+
+    \begin{pythoncode}
+def pairwise_manhattan_numpy_v4(points: np.ndarray) -> np.ndarray:
+    exp_points = np.expand_dims(points, 1)  # [N, 1, M]
+    return np.sum(np.abs(exp_points - points), axis=-1)
+    \end{pythoncode}
+\end{frame}
+
+\begin{section}{Manhattan Distance in Cython}
+
+\begin{frame}[fragile]
+\frametitle{Cython Implementation}
+    \begin{cythoncode}
+@cython.wraparound(False)
+@cython.boundscheck(False)
+cpdef int[:, :] pairwise_manhattan(int[:, :] points):
+    cdef int n = points.shape[0]
+    cdef int m = points.shape[1]
+    results = np.zeros((n, n), dtype=np.int32)
+    cdef int[:, :] results_view = results
+    cdef int i, j, k, dist
+    for i in range(n):
+        for j in range(i, n):
+            dist = 0
+            for k in range(m):
+                dist += abs(points[i, k] - points[j, k])
+            results_view[i, j] = dist
+            results_view[j, i] = dist
+    return results
+
+    \end{cythoncode}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Cython Decorators}
+    \begin{cythoncode}
+@cython.wraparound(False)
+@cython.boundscheck(False)
+    \end{cythoncode}
+\end{frame}
+
+\end{section}
+
+\end{document}

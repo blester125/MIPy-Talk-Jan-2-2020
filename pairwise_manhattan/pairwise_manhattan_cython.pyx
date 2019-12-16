@@ -10,7 +10,7 @@ import numpy as np
 
 @cython.wraparound(False)
 @cython.boundscheck(False)
-cpdef pairwise_manhattan(int[:, :] points):
+cpdef int[:, :] pairwise_manhattan(int[:, :] points):
     cdef int n = points.shape[0]
     cdef int m = points.shape[1]
     results = np.zeros((n, n), dtype=np.int32)
