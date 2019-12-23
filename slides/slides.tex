@@ -71,7 +71,7 @@
             \item We use chat bots to ``facilitate customer care interaction'' aka to build better chat bots
             \item I mostly do DL and am a big Nerd so if you every want to talk about ML for NLP I'm game
             \item Python is my daily driver
-            \item Have several packages on PyPI including ones written in cython, the subject of today's talk
+            \item Have several packages on PyPI including ones written in cython (string-distance), the subject of today's talk
         \end{itemize}
     }
 \end{frame}
@@ -90,9 +90,9 @@
     \end{center}
     \note{
         \begin{itemize}
-            \item Ann Arbor Machine Learning and Data Science Slack we call it a2mads
+            \item a2mads is the Ann Arbor Machine Learning and Data Science Slack
             \item There aren't a lot of messages flying about but when someone asks a question there is normally a lot if discussion
-            \item This user was asking that given a list of points what is the distance between this point and every other point in the list
+            \item This user was asking that given a list of points what is the distance between a point and every other point in the list for each item in the list
             \item There was a long thread about how to optimize his solution, we will walk through some of them.
         \end{itemize}
     }
@@ -109,6 +109,7 @@
     \note{
         \begin{itemize}
             \item Distance if you can only move along the axes
+            \item Contrast with euclidean distance where we can move diagonally and go straight there.
             \item Like you have directions to somewhere in manhattan, you can't walk through a building, you need to walk along the streets
         \end{itemize}
     }
@@ -126,7 +127,7 @@
 
 \begin{frame}
     \frametitle{Manhattan Distance}
-        A point in $M$ dimensions is a vector of $M$ numbers where the values at index $i$ is the distance along the $i^{th}$ axis.
+        A point with $M$ dimensions is a vector of $M$ numbers where the values at index $i$ is the distance along the $i^{th}$ axis.
         \begin{align*}
             X &\in \R^{M} \\
             Y &\in \R^{M} \\
@@ -145,7 +146,7 @@
     \frametitle{Proof of Equal Lengths}
     \begin{columns}
         \column{0.5\textwidth}
-          \begin{tikzpicture}[xslant=1,xscale=2,scale=2]
+          \begin{tikzpicture}[xslant=1,xscale=1.8,scale=1.8]
               \coordinate (D) at (0,0);
               \coordinate (A) at (0,1);
               \coordinate (B) at (1,1);
@@ -164,31 +165,28 @@
               \draw pic[draw=black,-,angle eccentricity=1.2,angle radius=0.65cm] {angle=C--D--B};
           \end{tikzpicture}
         \column{0.5\textwidth}
-            \begin{align}
-                \overline{AB} &\parallel \overline{DC} \\
-                \overline{AD} &\parallel \overline{BC} \\
+            \begin{proof}
+            let $\overline{AB} \parallel \overline{DC}$ and $\overline{AD} \parallel \overline{BC}$ by the definition of a parallelogram.
+            \begin{align*}
                 \angle ABD &\cong \angle CDB \\
-                \angle ADB &\cong \angle DBC \\
+                \angle ADB &\cong \angle CBD \\
                 \overline{DB} &= \overline{DB} \\
-                \triangle ADB &\cong \triangle{CDB} \\
-                \overline{AB} &= \overline{CD} \\
-                \overline{AD} &= \overline{CB} \qed
-            \end{align}
+                \triangle ADB &\cong \triangle{CBD} \\
+                \overline{AB} &= \overline{DC} \\
+                \overline{AD} &= \overline{BC}
+            \end{align*}
+            \end{proof}
     \end{columns}
     \note{
-        \begin{enumerate}
-            \item AB and DC are parallel by the definition of a parallelogram
-            \item AD and BC are parallel by the definition of a parallelogram
-                \begin{itemize}
-                    \item  DB is a transversal of both sets of parallel lines
-                \end{itemize}
+        \begin{itemize}
+            \item  DB is a transversal of both sets of parallel lines
             \item ABD and CDB are congruent because they are alternate interior angles
             \item ADB and DBC are congruent because they are alternate interior angles
             \item It is the same length as itself
             \item Triangles are congruent by angle side angle
             \item AB and CD are the same because they are the same sides of congruent triangles
             \item AD and CB are the same because they are the same sides of congruent triangles
-        \end{enumerate}
+        \end{itemize}
     }
 \end{frame}
 
@@ -201,25 +199,25 @@
 \begin{frame}
     \frametitle{NumPy}
     \begin{itemize}
-        \item<1-> \href{https://docs.scipy.org/doc/numpy/reference/}{NumPy}: A collection of linear algebra functions that operate on a \tt{ndarray}
-        \item<2-> \tt{ndarray} is a typed container that can represent multi-dimensional arrays
+        \item<1-> \href{https://docs.scipy.org/doc/numpy/reference/}{NumPy}: A collection of linear algebra functions that operate on a \texttt{ndarray}
+        \item<2-> \texttt{ndarray} is a typed container that can represent multi-dimensional arrays
         \item<3-> The majority of functionality is implemented in C extensions for speed
     \end{itemize}
     \note{
         \begin{itemize}
-            \item \tt{ndarray} has a data type
+            \item \texttt{ndarray} has a data type
             \begin{itemize}
                 \item all the items in it need to be the same and they can be stored contiguously in memory.
                 \item So instead of following pointers for to the object for each element in a python list we can access the element directly
                 \item This makes access fast and because they are together in memory we get better cache utilization
             \end{itemize}
-            \item \tt{ndarray} is a multi dimensional array
+            \item \texttt{ndarray} is a multi dimensional array
             \begin{itemize}
                 \item a thing is a scalar
                 \item a list of things is an array (or vector)
                 \item a list of arrays is a matrix
-                \item a list of matrices is a \tt{ndarray}
-                \item You can index like \tt{x[i, j, k]}
+                \item a list of matrices is a \texttt{ndarray}
+                \item You can index like \texttt{x[i, j, k]}
                 \item can have an arbitrary dimensions
             \end{itemize}
             \item A C extension is code written in C that can be called from python. You can use the speed of C and let go of the GIL. Loses ease of Python
@@ -236,11 +234,13 @@
         \item<4-> You can call python code from inside the C extension
         \item<5-> It can compile pure python code
         \item<6-> Makes it easy to wrap C libraries
+        \item<7-> Some large libraries like \href{https://spacy.io/}{SpaCy} are all cython
     \end{itemize}
     \note{
         \begin{itemize}
             \item Cython is a superset of python, adds things like static types
             \item Compiling just python gives a slight speed boost
+            \item You can also write code that releases the GIL so multithreading is possible
         \end{itemize}
     }
 \end{frame}
@@ -248,6 +248,12 @@
 \end{section} %Background
 
 \begin{section}{Implementations}
+
+\begin{frame}
+    \begin{center}
+    \Large{Let get to the code}
+    \end{center}
+\end{frame}
 
 \begin{subsection}{Python}
 
@@ -271,17 +277,25 @@ def pairwise_manhattan_python_v1(
     return results
     \end{pythoncode}
     \begin{itemize}
-        \item<2->$\BigO(N^2M)$ in runtime
-        \item<2->$\BigO(N^2)$ in memory
+        \item<3->$\BigO(N^2M)$ in runtime
+        \item<3->$\BigO(N^2)$ in memory
     \end{itemize}
-    \note{
+    \note<1>{
         \begin{itemize}
             \item It is 2020, python2 is dead, lets all start using type hints
             \item This is the most brute force apprach, for all combinations of points calculate the manhattan distance
             \item Input is a list of $N$ points where each point is a List of $M$ integers
         \end{itemize}
     }
-    \note<2->{
+    \note<2>{
+        \begin{itemize}
+            \item When optimizing you want to save all the time you can in the inner most loop
+            \item every second wasted in the setup is only wasted once
+            \item every second wasted in the inner loop is wasted over and over
+            \item Python function calls have overhead so by manually inlining the Manhattan Distance calculation we get a speed up
+        \end{itemize}
+    }
+    \note<3>{
         \begin{itemize}
             \item Big-O notation
             \item for $x$ in points $\rightarrow$ a loop over $N$ points $\BigO(N)$
@@ -304,7 +318,7 @@ def pairwise_manhattan_python_v1(
     }
 \end{frame}
 
-\againframe<2->{python_v1}
+\againframe<2-3>{python_v1}
 
 \begin{frame}<1>[fragile, label=python_v2]
     \frametitle{Python v2}
@@ -404,7 +418,7 @@ def pairwise_manhattan_python_v2(
 \end{frame}
 
 \begin{frame}
-    \frametitle{Symetric Manhattan Distance}
+    \frametitle{Symmetric Manhattan Distance}
     \begin{center}
     $\md(X, Y) = \sum_i^M | X_i - Y_i |$
     \end{center}
@@ -500,8 +514,8 @@ def pairwise_manhattan_numpy_v2(
     \note<2>{
         \begin{itemize}
             \item points i is an $M$ dimensional point
-            \item The subtraction and the \tt{np.abs} is a vectorized function
-            \item The \tt{np.sum} is a reduction
+            \item The subtraction and the \texttt{np.abs} is a vectorized function
+            \item The \texttt{np.sum} is a reduction
         \end{itemize}
     }
 \end{frame}
@@ -574,16 +588,16 @@ def pairwise_manhattan_numpy_v3(points: np.ndarray) -> np.ndarray:
         \begin{itemize}
             \item points i is $\in \R^M$
             \item points is $\in \R^{N \text{ x } M}$
-            \item The result of broadcasting vectorization for points is \tt{[N, M]}
-            \item There is this new kwarg for \tt{np.sum}, \tt{axis}
+            \item The result of broadcasting vectorization for points is \texttt{[N, M]}
+            \item There is this new kwarg for \texttt{np.sum}, \texttt{axis}
             \item This is a way to apply reductions to multi dimensional inputs
         \end{itemize}
     }
     \note<3>{
         \begin{itemize}
-            \item Reducing \tt{[N, M]} over axis 1 gives us \tt{N}
+            \item Reducing \texttt{[N, M]} over axis 1 gives us \texttt{N}
             \item Results is a list of vectors of size $N$
-            \item \tt{np.stack} puts them on top of each other to form a single matrix
+            \item \texttt{np.stack} puts them on top of each other to form a single matrix
             \item Typing for array shapes has no support which sucks, there are shapes that are expected to make the broadcasting work but you can't communicate these compatibilities with type hints
         \end{itemize}
     }
@@ -685,7 +699,7 @@ def pairwise_manhattan_numpy_v3(points: np.ndarray) -> np.ndarray:
 \begin{frame}
     \frametitle{Reduction Along an Axis}
     \begin{center}
-        \tt{y = np.sum(x, axis=1)}
+        \texttt{y = np.sum(x, axis=1)}
     \end{center}
     \begin{columns}
         \column{0.5\textwidth}
@@ -723,7 +737,7 @@ def pairwise_manhattan_numpy_v3(points: np.ndarray) -> np.ndarray:
 \begin{frame}
     \frametitle{Reduction Along an Axis}
     \begin{center}
-        \tt{y = np.sum(x, axis=0)}
+        \texttt{y = np.sum(x, axis=0)}
     \end{center}
     \begin{columns}
         \column{0.5\textwidth}
@@ -750,7 +764,7 @@ def pairwise_manhattan_numpy_v3(points: np.ndarray) -> np.ndarray:
     \note{
         \begin{itemize}
             \item Redction over axis 0 is over the rows for matrices
-            \item There is also a \tt{keepdims} argument to keep the sinlge dimension of size 1 so instead of getting a vector of size $3$ you get one of size \tt{[1, 3]}
+            \item There is also a \texttt{keepdims} argument to keep the sinlge dimension of size 1 so instead of getting a vector of size $3$ you get one of size \texttt{[1, 3]}
         \end{itemize}
     }
 \end{frame}
@@ -769,10 +783,10 @@ def pairwise_manhattan_numpy_v4(points: np.ndarray) -> np.ndarray:
         \begin{itemize}
             \item All the loops are gone!
             \item We add a dimension of size $1$ into the points
-            \item When we do the subtraction the points \tt{[N, M]} is expanded to \tt{[1, N, M]}
-            \item \tt{[N. 1. M]} + \tt{[1, N, N]} $\rightarrow$ \tt{[N, N, M]}
+            \item When we do the subtraction the points \texttt{[N, M]} is expanded to \texttt{[1, N, M]}
+            \item \texttt{[N. 1. M]} + \texttt{[1, N, N]} $\rightarrow$ \texttt{[N, N, M]}
             \item Reduction over axis $-1$ (same as negative indexing in python, sum over the last dim)
-            \item Reduction gives us \tt{[N, N]} aka our answer
+            \item Reduction gives us \texttt{[N, N]} aka our answer
         \end{itemize}
     }
 \end{frame}
@@ -801,11 +815,17 @@ cpdef int[:, :] pairwise_manhattan(int[:, :] points):
             results_view[j, i] = dist
     return results
     \end{cythoncode}
-    \note{
+    \note<1->{
         \begin{itemize}
             \item The cython code looks a lot like our original python code
             \item we can just write loops, we don't have to thing about vectorization
             \item There are a lot of annotations that help speed things up.
+        \end{itemize}
+    }
+    \note<2->{
+        \begin{itemize}
+            \item There are a lot of optimizations left of the table, for example operating on 4 points at a time in the inner loops for better cache coherence
+            \item This kind of optimizations are very hard (impossible) to express with NumPy
         \end{itemize}
     }
 \end{frame}
@@ -819,8 +839,8 @@ cpdef int[:, :] pairwise_manhattan(int[:, :] points):
     \note{
         \begin{itemize}
             \item These are directives that tell cython how to compile code
-            \item \tt{wrapsround} turns off the ability to do negative indexing
-            \item \tt{boundscheck} turns off rasing an error when you access past the end of an array
+            \item \texttt{wrapsround} turns off the ability to do negative indexing
+            \item \texttt{boundscheck} turns off rasing an error when you access past the end of an array
             \item Bpth of these ease of use thing require the length of the array. C arrays don't carry their lengths so we need to ask the python object for the length. Accessing python objects are slow and require the GIL
         \end{itemize}
     }
@@ -833,8 +853,8 @@ cpdef int[:, :] pairwise_manhattan(int[:, :] points):
     \end{cythoncode}
     \note{
         \begin{itemize}
-            \item \tt{cpdef} is a utility to make this function callable by python code and other cython code. C function calls are faster and there is slight overhead from the \tt{cpdef}. Cython in a tight inner loop (like a function of manhattan distance) should use \tt{cdef}
-            \item \tt{int[:, :]} before the function name is the return type
+            \item \texttt{cpdef} is a utility to make this function callable by python code and other cython code. C function calls are faster and there is slight overhead from the \texttt{cpdef}. Cython in a tight inner loop (like a function of manhattan distance) should use \texttt{cdef}
+            \item \texttt{int[:, :]} before the function name is the return type
             \item It is also a type of the input (points)
             \item We will get to what the types are in a second
         \end{itemize}
@@ -852,8 +872,8 @@ cpdef int[:, :] pairwise_manhattan(int[:, :] points):
     \end{cythoncode}
     \note{
         \begin{itemize}
-            \item \tt{cdef} is used to statically declare variables. This tells the compiler what the type is so it can compile it to C.
-            \item \tt{int[:, :]} is a typed memoryview
+            \item \texttt{cdef} is used to statically declare variables. This tells the compiler what the type is so it can compile it to C.
+            \item \texttt{int[:, :]} is a typed memoryview
             \item a type memoryview is a look into the memory of an object that supports the buffer interface
             \item buffer interface is way that objects can layout their memory of other things can access the content. NumPy arrayssupport this interface
             \item results is actually a dynamically created numpy array, it it known to the python interpreter, the gil is needed to make it, and the ref counter is incremented by one when we make it, Making it so easy to create python objects is a strength of cython
@@ -862,7 +882,34 @@ cpdef int[:, :] pairwise_manhattan(int[:, :] points):
     }
 \end{frame}
 
-\againframe{cython}
+\begin{frame}[fragile]
+    \frametitle{Cython Manhattan Distance}
+    \begin{cythoncode}
+    from libc.stdlib cimport abs
+    cimport cython
+
+    @cython.wraparound(False)
+    @cython.boundscheck(False)
+    cdef inline int manhattan_distance(int[:] x, int[:] y):
+        cdef iint i
+        cdef int m = x.shape[0]
+        cdef int dist = 0
+        for i in range(m):
+            dist += abs(x[i] - y[i])
+        return dist
+    \end{cythoncode}
+    \note{
+        \begin{itemize}
+            \item I didn't do this in the code so it looks like the others
+            \item cdef means this is only callable from cython but it has fast C function calls instead of slow python calls
+            \item the inline keyword means when this is complied this code is directly insearted, not called as a function
+            \item This gives us the speed of having code inline but the reusablilty/nice SWE of having a seperate function for it.
+            \item We import \texttt{abs} from the C standard library so we always use the C version, if not cython will swap the version (C vs python) based on the datatypes and we wouldn't be able to release the GIL
+        \end{itemize}
+    }
+\end{frame}
+
+\againframe<2>{cython}
 
 \end{subsection} %Cython
 \end{section} %Implementation
@@ -870,9 +917,52 @@ cpdef int[:, :] pairwise_manhattan(int[:, :] points):
 \begin{section}{Results}
 
 \begin{frame}
-    \frametitle{Timing vs the number of points}
+    \frametitle{Scaling in the Number of Points}
 \end{frame}
 
+\begin{frame}
+    \frametitle{Scaling in the Number of Points (subset)}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Scaling in the Number of Dimensions}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Timing Curves}
+\end{frame}
 \end{section} %Results
+
+\begin{section}{Conclusion}
+
+\begin{frame}
+    \frametitle{Conclusion}
+    \begin{itemize}
+        \item Vectorization and Broadcasting in NumPy lets us push loops from python into C
+        \item Cython lets us write fast loops and is useful for speeding up difficult to vectorize code
+        \item If you have a custom use case cython can often beat the more general NumPy solution
+    \end{itemize}
+    \begin{itemize}
+        \item Not in this talk but Cython also supports defining objects and structs which makes it amenable to speeding up code that isn't all numeric arrays
+        \item Numba and NumPy are basically array only if you want speed.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Links}
+    \begin{itemize}
+        \item Notebook: \href{https://www.google.com}{NBViewer Link}
+        \item Slides: \href{https://www.google.com}{Link to slides}
+        \item Twitter: \href{https://twitter.com/BrianLester125}{https://twitter.com/BrianLester125}
+        \item GitHub: \href{https://github.com/blester125}{https://github.com/blester125}
+    \end{itemize}
+    \note{
+        \begin{itemize}
+            \item The link to the slides is in a GitHub repo that has all these implementations, code to reproduce the graphs, and a docker container that has optimized versions of NumPy installed.
+        \end{itemize}
+    }
+\end{frame}
+
+\end{section} %Conclusion
 
 \end{document}
