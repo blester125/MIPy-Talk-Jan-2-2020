@@ -45,7 +45,7 @@ setup(
     keywords=["Numpy", "Optimization", "Numerical Computing"],
     entry_points={},
     ext_modules=cythonize("pairwise_manhattan/pairwise_manhattan_cython.pyx"),
-    classifiers={
+    classifiers=[
         "Development Status :: 3 - Alpha",
         "Environment :: Console",
         "Intended Audience :: Developers",
@@ -54,5 +54,5 @@ setup(
         "Natural Language :: English",
         "Programming Language :: Python :: 3 :: Only",
         "Topic :: Scientific/Engineering",
-    },
+    ],
 )
