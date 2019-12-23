@@ -31,11 +31,16 @@
               postaction={decorate}},
 }
 
+\newtheoremstyle{case}{}{}{}{}{}{:}{ }{}
+\theoremstyle{case}
+\newtheorem{case}{Case}
+
 \usepackage{pgfpages}
 \setbeamertemplate{note page}{\pagecolor{yellow!5}\insertnote}
 \setbeameroption{show notes on second screen=right}
 
 \DeclareMathOperator{\md}{Manhattan Distance}
+\DeclareMathOperator{\BigO}{O}
 
 \title{Crunching Numbers with NumPy and Cython}
 \author{Brian Lester}
@@ -70,7 +75,7 @@
     }
 \end{frame}
 
-\end{section}
+\end{section} %Bio
 
 \begin{section}{Background}
 
@@ -108,29 +113,32 @@
     }
 \end{frame}
 
-\begin{frame}[label=block]
+\begin{frame}<1>[label=block]
     \begin{center}
         \includegraphics[width=0.9\textwidth]{images/manhattan.png}
     \end{center}
+    \note<1>[item]{Here we can see example of moving between points as the Manhattan distance does}
+    \note<2>[item]{As suggested by the calculation for Manhattan Distance all of these paths have the same length, we'll look at why this is}
 \end{frame}
 
 \againframe<2->{md}
 
 \begin{frame}
     \frametitle{Manhattan Distance}
-        A point in $M$ dimensions is a vector of $M$ integers where the values at index $i$ is the distance along the $i^{th}$ axis.
-\end{frame}
-
-\begin{frame}
-    \frametitle{Manhattan Distance}
+        A point in $M$ dimensions is a vector of $M$ numbers where the values at index $i$ is the distance along the $i^{th}$ axis.
         \begin{align*}
             X &\in \R^{M} \\
             Y &\in \R^{M} \\
             \md(X, Y) &= \sum_i^M | X_i - Y_i |
         \end{align*}
+        \note{
+            \begin{itemize}
+                \item While the Manhattan distance works for real numbers we will only be looking at Ints in code
+            \end{itemize}
+        }
 \end{frame}
 
-\againframe{block}
+\againframe<2>{block}
 
 \begin{frame}
     \frametitle{Proof of Equal Lengths}
@@ -163,7 +171,7 @@
                 \overline{DB} &= \overline{DB} \\
                 \triangle ADB &\cong \triangle{CDB} \\
                 \overline{AB} &= \overline{CD} \\
-                \overline{AD} &= \overline{CB}
+                \overline{AD} &= \overline{CB} \qed
             \end{align}
     \end{columns}
     \note{
@@ -187,13 +195,13 @@
     \frametitle{Proof of Shortest Path}
 \end{frame}
 
-\end{subsection}
+\end{subsection} %Manhattan Distance
 
 \begin{frame}
     \frametitle{NumPy}
     \begin{itemize}
         \item<1-> \href{https://docs.scipy.org/doc/numpy/reference/}{NumPy}: A collection of linear algebra functions that operate on a \tt{ndarray}
-        \item<2-> \tt{ndarray} is a type container that can represent multi-dimensional arrays
+        \item<2-> \tt{ndarray} is a typed container that can represent multi-dimensional arrays
         \item<3-> The majority of functionality is implemented in C extensions for speed
     \end{itemize}
     \note{
@@ -213,7 +221,7 @@
                 \item You can index like \tt{x[i, j, k]}
                 \item can have an arbitrary dimensions
             \end{itemize}
-            \item A C extension is code writen in C that can be called from python. You can use the speed of C and let go of the GIL. Loses ease of Python
+            \item A C extension is code written in C that can be called from python. You can use the speed of C and let go of the GIL. Loses ease of Python
         \end{itemize}
     }
 \end{frame}
@@ -236,11 +244,14 @@
     }
 \end{frame}
 
-\end{section}
+\end{section} %Background
 
+\begin{section}{Implementations}
 
-\begin{frame}[fragile]
-\frametitle{Python v1}
+\begin{subsection}{Python}
+
+\begin{frame}<1>[fragile,label=python_v1]
+    \frametitle{Python v1}
 
     \begin{pythoncode}
 def pairwise_manhattan_python_v1(
@@ -248,22 +259,53 @@ def pairwise_manhattan_python_v1(
 ) -> List[List[int]]:
     results = []
     # For each pair of points
-    for i in range(len(points)):
-        dist_i_j = []
-        for j in range(len(points)):
+    for x in points:
+        dists = []
+        for y points:
             # Manhattan distance
-            dist_i_j.append(sum(
-                abs(p1 - p2) for p1, p2 in zip(points[i], points[j])
-            ))
-        results.append(dist_i_j)
+            dist.append(
+                sum(abs(x_i - y_i) for x_i, y_i in zip(x, y))
+            )
+        results.append(dist)
     return results
     \end{pythoncode}
-
+    \begin{itemize}
+        \item<2->$\BigO(N^2M)$ in runtime
+        \item<2->$\BigO(N^2)$ in memory
+    \end{itemize}
+    \note{
+        \begin{itemize}
+            \item This is the most brute force apprach, for all combinations of points calculate the manhattan distance
+            \item Input is a list of $N$ points where each point is a List of $M$ integers
+        \end{itemize}
+    }
+    \note<2->{
+        \begin{itemize}
+            \item Big-O notation
+            \item for $x$ in points $\rightarrow$ a loop over $N$ points $\BigO(N)$
+            \item for $y$ in points $\rightarrow$ a loop over $N$ points for each point in the $N$ points, $\BigO(N^2)$
+            \item for $x_i$, $y_i$ in zip($x$, $y$) $\rightarrow$ a loop over $M$ dimentions, $\BigO(N^2M)$
+            \item Memory used is $\O(N^2)$ for the result matrix, external memory datastructures are not used
+        \end{itemize}
+    }
 \end{frame}
 
-
 \begin{frame}[fragile]
-\frametitle{Python v2}
+    \frametitle{Python Manhattan Distance}
+    \begin{pythoncode}
+        sum(abs(x_i - y_i) for x_i, y_i in zip(x, y))
+    \end{pythoncode}
+    \note{
+        \begin{itemize}
+            \item This is the calculation of manhattan distance directly translated from Math
+        \end{itemize}
+    }
+\end{frame}
+
+\againframe<2->{python_v1}
+
+\begin{frame}<1>[fragile, label=python_v2]
+    \frametitle{Python v2}
 
     \begin{pythoncode}
 def pairwise_manhattan_python_v2(
@@ -284,25 +326,112 @@ def pairwise_manhattan_python_v2(
             results[j][i] = dist
     return results
     \end{pythoncode}
-
-\end{frame}
-
-\begin{frame}
-    \frametitle{Manhattan Distance}
-    \begin{align*}
-        X &\in \R^{M} \\
-        Y &\in \R^{M} \\
-        \md(X, Y) &= \sum_i^M | X_i - Y_i |
-    \end{align*}
-    \note{
+    \note<1>{
         \begin{itemize}
-            \item Even though there is a subtraction which isn't commuatitive there is an absoulte value so it doesn't matter which is substracted from whick
+            \item This is the only algorithmic improvemnt so our code
+            \item The Manhattan distance is symetric ($\md(X, Y) = \md(Y,X)$)
+            \item The distance from point i to point j is the same as the distance from point j to point i
+        \end{itemize}
+    }
+    \note<2>{
+        \begin{itemize}
+            \item We can reuse the result from one direction and skip commuting it for the other
+            \item Big O throws away constants so the is still $\BigO(N^2M)$
+            \item We could use a similar trick to reduce memory usage by just having user of the results always index with some rule where the tuple of points need to be sorted or something similar, not worth it so still $\BigO(N^2)$ in memory.
         \end{itemize}
     }
 \end{frame}
 
+\begin{frame}
+    \frametitle{Symetric Manhattan Distance}
+    \begin{center}
+    $\md(X, Y) = \sum_i^M | X_i - Y_i |$
+    \end{center}
+    \begin{proof}
+        $\md(X, Y) = \md(Y,X)$
+        \begin{case}
+            let $x - y > 0$
+            \begin{align*}
+                y - x &< 0 \\
+                |x - y| &= x - y \\
+                |y - x| &= -(y - x) \\
+                -(y - x) &= x - y
+            \end{align*}
+        \end{case}
+    \end{proof}
+    \note{
+        \begin{itemize}
+            \item The Manhattan distance is a distance metric and it be one mathematically it needs to be symmetrical but we can see why here
+            \item in the case where the difference is greater than one
+            \item The switched must be negative
+            \item Because we are positive value is just the difference
+            \item The switched is the difference multiplied $-1$ because it negative and need to be positive
+            \item distribute the multiplication and rearrange
+        \end{itemize}
+    }
+\end{frame}
+
+\begin{frame}
+    \frametitle{Symetric Manhattan Distance}
+    \begin{center}
+    $\md(X, Y) = \sum_i^M | X_i - Y_i |$
+    \end{center}
+    \begin{proof}
+        $\md(X, Y) = \md(Y,X)$
+        \begin{case}
+            let $x - y < 0$
+            \begin{align*}
+                y - x &> 0 \\
+                |y - x| &= y - x \\
+                |x - y| &= -(x - y) \\
+                -(x - y) &= y - x
+            \end{align*}
+        \end{case}
+    \end{proof}
+    \note{
+        \begin{itemize}
+            \item The Manhattan distance is a distance metric and it be one mathematically it needs to be symmetrical but we can see why here
+            \item in the case where the difference is less than one
+            \item The switched must be positive
+            \item Our result if the difference multiplied by $-1$ because it negative and need to be positive
+            \item Because the switched is positive its value is just the difference
+            \item distribute the multiplication and rearrange
+        \end{itemize}
+    }
+\end{frame}
+
+\begin{frame}
+    \frametitle{Symetric Manhattan Distance}
+    \begin{center}
+    $\md(X, Y) = \sum_i^M | X_i - Y_i |$
+    \end{center}
+    \begin{proof}
+        $\md(X, Y) = \md(Y,X)$
+        \begin{case}
+            let $x - y = 0$
+            \begin{align*}
+                y - x = 0 \\
+                |x - y| = 0 \\
+                |y - x| = 0
+            \end{align*}
+        \end{case}
+    \end{proof}
+    \note{
+        \begin{itemize}
+            \item The Manhattan distance is a distance metric and it be one mathematically it needs to be symmetrical but we can see why here
+            \item In the case we are zero the switch is zero so we have the same value.
+        \end{itemize}
+    }
+\end{frame}
+
+\againframe<2>{python_v2}
+
+\end{subsection} %Python
+
+\begin{subsection}{NumPy}
+
 \begin{frame}[fragile]
-\frametitle{Numpy v1}
+    \frametitle{Numpy v1}
 
     \begin{pythoncode}
 def pairwise_manhattan_numpy_v1(
@@ -316,9 +445,8 @@ def pairwise_manhattan_numpy_v1(
     \end{pythoncode}
 \end{frame}
 
-
 \begin{frame}[fragile]
-\frametitle{Numpy v2}
+    \frametitle{Numpy v2}
 
     \begin{pythoncode}
 def pairwise_manhattan_numpy_v2(
@@ -335,7 +463,7 @@ def pairwise_manhattan_numpy_v2(
 \end{frame}
 
 \begin{frame}[fragile]
-\frametitle{Numpy v3}
+    \frametitle{Numpy v3}
 
     \begin{pythoncode}
 def pairwise_manhattan_numpy_v3(points: np.ndarray) -> np.ndarray:
@@ -348,7 +476,7 @@ def pairwise_manhattan_numpy_v3(points: np.ndarray) -> np.ndarray:
 \end{frame}
 
 \begin{frame}[fragile]
-\frametitle{Numpy v4}
+    \frametitle{Numpy v4}
 
     \begin{pythoncode}
 def pairwise_manhattan_numpy_v4(points: np.ndarray) -> np.ndarray:
@@ -357,10 +485,12 @@ def pairwise_manhattan_numpy_v4(points: np.ndarray) -> np.ndarray:
     \end{pythoncode}
 \end{frame}
 
-\begin{section}{Manhattan Distance in Cython}
+\end{subsection} %NumPy
+
+\begin{subsection}{Cython}
 
 \begin{frame}[fragile]
-\frametitle{Cython Implementation}
+    \frametitle{Cython Implementation}
     \begin{cythoncode}
 @cython.wraparound(False)
 @cython.boundscheck(False)
@@ -378,18 +508,18 @@ cpdef int[:, :] pairwise_manhattan(int[:, :] points):
             results_view[i, j] = dist
             results_view[j, i] = dist
     return results
-
     \end{cythoncode}
 \end{frame}
 
 \begin{frame}[fragile]
-\frametitle{Cython Decorators}
+    \frametitle{Cython Decorators}
     \begin{cythoncode}
 @cython.wraparound(False)
 @cython.boundscheck(False)
     \end{cythoncode}
 \end{frame}
 
-\end{section}
+\end{subsection} %Cython
+\end{section} %Implementation
 
 \end{document}
