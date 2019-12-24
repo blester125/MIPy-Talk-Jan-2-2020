@@ -10,10 +10,11 @@ WORKDIR /usr/app
 
 COPY . .
 
-RUN /bin/bash -c ". activate MIPy" && \
+RUN /bin/bash -c ". activate MIPy && \
     conda install --file requirements.txt && \
     conda install --file requirements-dev.txt && \
     pip install -e .[test] && \
-    pytest
+    pytest"
 
-ENTRYPOINT ["jupyter", "notebook", "scripts/cython-jupyter-example.ipynb"]
+ENTRYPOINT ["./preexec.sh"]
+CMD ["python"]
