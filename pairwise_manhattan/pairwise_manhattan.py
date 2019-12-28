@@ -14,6 +14,16 @@ def pairwise_manhattan_python_v1(points: List[List[int]]) -> List[List[int]]:
     return results
 
 
+def pairwise_manhattan_python_v1(points: List[List[int]]) -> List[List[int]]:
+    results = []
+    for x in points:
+        dist = []
+        for y in points:
+            dist.append(sum(abs(x_i - y_i) for x_i, y_i in zip(x, y)))
+        results.append(dist)
+    return results
+
+
 def pairwise_manhattan_python_v2(points: List[List[int]]) -> List[List[int]]:
     # Preallocate the results
     results = [[None] * len(points) for _ in range(len(points))]
