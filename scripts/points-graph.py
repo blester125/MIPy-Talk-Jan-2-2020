@@ -12,6 +12,7 @@ def main():
     parser.add_argument('timings')
     parser.add_argument('--impls', nargs="+")
     parser.add_argument('--points', type=int, nargs="+")
+    parser.add_argument('--max-points', '--max_points', type=int)
     parser.add_argument('--dims', type=int, required=True)
     parser.add_argument('--output')
     args = parser.parse_args()
@@ -22,6 +23,9 @@ def main():
 
     if args.impls is None:
         args.impls = sorted(set(df.impl))
+
+    if args.max_points is not None:
+        args.points = range(args.max_points)
 
     fig, ax = plt.subplots(figsize=(12, 8), dpi=200)
 

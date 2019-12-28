@@ -569,8 +569,24 @@ def pairwise_manhattan_numpy_v2(
 \againframe<2>{numpy_v2}
 
 \begin{frame}
-    \frametitle{Timing as the number of points increase}
-    Show graph of increasing the number of points for a few algos, python v1, v2, and numpy
+    \includegraphics[width=\linewidth]{images/timing-vs-dims-at-100.png}
+    \note{
+        \begin{itemize}
+            \item This is a plot of the timing vs the number of dimentions in a point.
+            \item For the \texttt{python\_brute} and \texttt{python\_cached} implementations we can see the predicted $\BigO(M)$ growth.
+            \item At small input sizes we can see there is some overhead for converting lists into numpy that counteracts the
+                advangate of vectorization
+        \end{itemize}
+    }
+\end{frame}
+
+\begin{frame}
+    \includegraphics[width=\linewidth]{images/timing-vs-dims-at-100.png}
+    \note{
+        \begin{itemize}
+            \item
+        \end{itemize}
+    }
 \end{frame}
 
 \begin{frame}<1>[fragile,label=numpy_v3]

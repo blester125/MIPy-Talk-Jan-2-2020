@@ -13,6 +13,7 @@ def main():
     parser.add_argument('--impls', nargs="+")
     parser.add_argument('--points', type=int, required=True)
     parser.add_argument('--dims', type=int, nargs="+")
+    parser.add_argument('--max_dims', '--max-dims', type=int)
     parser.add_argument('--output')
     args = parser.parse_args()
 
@@ -22,6 +23,9 @@ def main():
 
     if args.impls is None:
         args.impls = sorted(set(df.impl))
+
+    if args.max_dims is not None:
+        args.dims = range(args.max_dims)
 
     fig, ax = plt.subplots(figsize=(12, 8), dpi=200)
 
@@ -35,6 +39,7 @@ def main():
 
     output = f"timing-vs-dims-at-{args.points}.png" if args.output is None else args.output
     plt.tight_layout()
+    print(f"Saving Graph to {output}")
     fig.savefig(output)
 
 
