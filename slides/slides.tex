@@ -277,8 +277,8 @@ def pairwise_manhattan_python_v1(
     return results
     \end{pythoncode}
     \begin{itemize}
-        \item<3->$\BigO(N^2M)$ in runtime
-        \item<3->$\BigO(N^2)$ in memory
+        \item<2->$\BigO(N^2M)$ in runtime
+        \item<2->$\BigO(N^2)$ in memory
     \end{itemize}
     \note<1>{
         \begin{itemize}
@@ -287,21 +287,22 @@ def pairwise_manhattan_python_v1(
             \item Input is a list of $N$ points where each point is a List of $M$ integers
         \end{itemize}
     }
-    \note<2>{
+    \note<3>{
         \begin{itemize}
             \item When optimizing you want to save all the time you can in the inner most loop
             \item every second wasted in the setup is only wasted once
             \item every second wasted in the inner loop is wasted over and over
             \item Python function calls have overhead so by manually inlining the Manhattan Distance calculation we get a speed up
+            \item Without in-lining we pay for the all $\BigO(N^2)$ times
         \end{itemize}
     }
-    \note<3>{
+    \note<2>{
         \begin{itemize}
             \item Big-O notation
             \item for $x$ in points $\rightarrow$ a loop over $N$ points $\BigO(N)$
             \item for $y$ in points $\rightarrow$ a loop over $N$ points for each point in the $N$ points, $\BigO(N^2)$
             \item for $x_i$, $y_i$ in zip($x$, $y$) $\rightarrow$ a loop over $M$ dimentions, $\BigO(N^2M)$
-            \item Memory used is $\O(N^2)$ for the result matrix, external memory datastructures are not used
+            \item Memory used is $\BigO(N^2)$ for the result matrix, external memory datastructures are not used
         \end{itemize}
     }
 \end{frame}
@@ -352,7 +353,7 @@ def pairwise_manhattan_python_v2(
     }
     \note<2>{
         \begin{itemize}
-            \item We can reuse the result from one direction and skip commuting it for the other
+            \item We can reuse the result from one direction and skip computing it for the other
             \item Big O throws away constants so the is still $\BigO(N^2M)$
             \item We could use a similar trick to reduce memory usage by just having user of the results always index with some rule where the tuple of points need to be sorted or something similar, not worth it so still $\BigO(N^2)$ in memory.
         \end{itemize}
@@ -365,8 +366,9 @@ def pairwise_manhattan_python_v2(
     $\md(X, Y) = \sum_i^M | X_i - Y_i |$
     \end{center}
     \begin{proof}
+        \renewcommand{\qedsymbol}{}
         $\md(X, Y) = \md(Y,X)$
-        \begin{case}
+        \begin{case}[1]
             let $x - y > 0$
             \begin{align*}
                 y - x &< 0 \\
@@ -394,8 +396,9 @@ def pairwise_manhattan_python_v2(
     $\md(X, Y) = \sum_i^M | X_i - Y_i |$
     \end{center}
     \begin{proof}
+        \renewcommand{\qedsymbol}{}
         $\md(X, Y) = \md(Y,X)$
-        \begin{case}
+        \begin{case}[2]
             let $x - y < 0$
             \begin{align*}
                 y - x &> 0 \\
@@ -424,7 +427,7 @@ def pairwise_manhattan_python_v2(
     \end{center}
     \begin{proof}
         $\md(X, Y) = \md(Y,X)$
-        \begin{case}
+        \begin{case}[3]
             let $x - y = 0$
             \begin{align*}
                 y - x = 0 \\
@@ -437,6 +440,9 @@ def pairwise_manhattan_python_v2(
         \begin{itemize}
             \item The Manhattan distance is a distance metric and it be one mathematically it needs to be symmetrical but we can see why here
             \item In the case we are zero the switch is zero so we have the same value.
+        \end{itemize}
+        \begin{itemize}
+            \item The absoulte difference is the same when reversed so the sum is of the same values to the total sum is the same
         \end{itemize}
     }
 \end{frame}
