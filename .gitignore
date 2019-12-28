@@ -7,3 +7,5 @@ build/*
 *.c
 **/.ipynb_checkpoints
 .python-version
+*.vrb
+*.pdfpc

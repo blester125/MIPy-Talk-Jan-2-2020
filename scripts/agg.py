@@ -25,8 +25,8 @@ def add_timing_data(file_name: str, points: int, dims: int, df: pd.DataFrame) ->
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data-dir", "--data_dir", default=".speed")
-    parser.add_argument("--output", default="timing.csv")
+    parser.add_argument("--data-dir", "--data_dir", default="speed_data")
+    parser.add_argument("--output", default=os.path.join("speed_data", "timing.csv"))
     args = parser.parse_args()
 
     df = pd.DataFrame([], columns=["impl", "points", "dims", "time"])
