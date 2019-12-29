@@ -28,6 +28,7 @@ pip install -e .
  * `pairwise_manhattan_numpy_v1` This is an implementation where the points are a list of numpy arrays. The manhattan distance between pairs of points is computed via numpy in a vectorized fashion.
  * `pairwise_manhattan_numpy_v2` This is like the last one but the distance calculated between pairs of points is reused for the pair in the opposite order.
  * `pairwise_manhattan_numpy_v3` This iterates over the pairs and will broadcast a single point over the rest of the points to calculate the distance between it and all other points in a single operation.
+ * `pairwise_manhattan_numpy_broadcast_cached` This is like the `v3` but we do a lot of work to not redo computation, we only calculate distances between later points. It then copies the resulting distances into the results matrix and then copies the upper triangle into the lower triangle.
  * `pairwise_manhattan_numpy_v4` This reshapes the points into two tensors of shape `[N, 1, M]` and `[1, N, M]`. This results in both sets of points broadcasting over each other to calculate the pair wise distances in a single op.
  * `pairwise_manhattan_cython` This is a cython port of the `pairwise_manhattan_python_v2` implementation.
  * `pairwise_manhattan_cython_p` This is the previous implementation with parallelization over the iterations of points. I haven't seen huge speed gains from this, there is probably some parameters like `OPEN_MP_THREADS` and the `prange` schedule that need to be tweaked.

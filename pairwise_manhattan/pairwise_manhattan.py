@@ -70,9 +70,9 @@ def pairwise_manhattan_numpy_broadcast_cached(points: np.ndarray) -> np.ndarray:
         dists.append(np.sum(np.abs(points[i] - points[i:]), axis=-1))
     for i, dist in enumerate(dists):
         results[i, i:] = dist
-    i_lower = np.tril_indices(len(points), -1)
-    results[i_lower] = results.T[i_lower]
-    return results
+    # This will copy the upper triangle into the lower one, it would double count the diagonal but
+    # because we know the distances between points and themselves is 0 the diag will stay zero
+    return results + results.T
 
 
 def pairwise_manhattan_numpy_v4(points: np.ndarray) -> np.ndarray:
