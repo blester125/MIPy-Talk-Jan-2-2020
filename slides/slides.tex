@@ -45,8 +45,8 @@
 
 \title{Crunching Numbers with NumPy and Cython}
 \author{Brian Lester}
-\institute{interactions}
-\date{\today}
+\institute{Interactions}
+\date{January 2, 2019}
 
 \begin{document}
 
@@ -289,7 +289,7 @@
 \begin{subsection}{Python}
 
 \begin{frame}<1>[fragile,label=python_v1]
-    \frametitle{Python v1}
+    \frametitle{Python Brute}
 
     \begin{pythoncode}
 def pairwise_manhattan_python_v1(
@@ -353,7 +353,7 @@ def pairwise_manhattan_python_v1(
 \againframe<2-3>{python_v1}
 
 \begin{frame}<1>[fragile, label=python_v2]
-    \frametitle{Python v2}
+    \frametitle{Python Cached}
 
     \begin{pythoncode}
 def pairwise_manhattan_python_v2(
@@ -486,7 +486,7 @@ def pairwise_manhattan_python_v2(
 \begin{subsection}{NumPy}
 
 \begin{frame}[fragile]
-    \frametitle{Numpy v1}
+    \frametitle{Numpy Brute}
 
     \begin{pythoncode}
 def pairwise_manhattan_numpy_v1(
@@ -507,7 +507,7 @@ def pairwise_manhattan_numpy_v1(
 \end{frame}
 
 \begin{frame}<1>[fragile,label=numpy_v2]
-    \frametitle{Numpy v2}
+    \frametitle{Numpy Cached}
 
     \begin{pythoncode}
 def pairwise_manhattan_numpy_v2(
@@ -629,7 +629,7 @@ def pairwise_manhattan_numpy_v2(
 \end{frame}
 
 \begin{frame}<1>[fragile,label=numpy_v3]
-    \frametitle{Numpy v3}
+    \frametitle{Numpy Broadcast}
 
     \begin{pythoncode}
 def pairwise_manhattan_numpy_v3(points: np.ndarray) -> np.ndarray:
@@ -680,7 +680,7 @@ def pairwise_manhattan_numpy_v3(points: np.ndarray) -> np.ndarray:
 \end{frame}
 
 \begin{frame}[fragile]
-    \frametitle{Roll your own Broadcasting}
+    \frametitle{Roll Your Own Broadcasting}
     \begin{pythoncode}
         def add_scalar_to_vector(scalar, vector):
             return [v + scalar for v in vector]
@@ -840,7 +840,7 @@ def pairwise_manhattan_numpy_v3(points: np.ndarray) -> np.ndarray:
 \againframe<3>{numpy_v3}
 
 \begin{frame}[fragile]
-    \frametitle{Numpy v4}
+    \frametitle{Numpy Double Broadcast}
 
     \begin{pythoncode}
 def pairwise_manhattan_numpy_v4(points: np.ndarray) -> np.ndarray:

@@ -2,7 +2,7 @@
 
 [![Actions Status](https://github.com/blester125/MIPy-Talk-Jan-2-2019/workflows/Unit%20Test/badge.svg)](https://github.com/blester125/MIPy-Talk-Jan-2-2019/actions)
 
-This is the code and [slides](https://docs.google.com/presentation/d/1_o6DVf1mgT9q4ukNrtjLBJCfm3PuVMbM-GnoiQV--k0/edit?usp=sharing) from my talk at the Michigan Python Meetup on January 2nd 2019.
+This is the code and [slides](https://github.com/blester125/MIPy-Talk-Jan-2-2020/blob/master/slides/slides.pdf) from my talk at the Michigan Python Meetup on January 2nd 2020.
 
 
 ## Install
@@ -31,3 +31,24 @@ pip install -e .
  * `pairwise_manhattan_numpy_v4` This reshapes the points into two tensors of shape `[N, 1, M]` and `[1, N, M]`. This results in both sets of points broadcasting over each other to calculate the pair wise distances in a single op.
  * `pairwise_manhattan_cython` This is a cython port of the `pairwise_manhattan_python_v2` implementation.
  * `pairwise_manhattan_cython_p` This is the previous implementation with parallelization over the iterations of points. I haven't seen huge speed gains from this, there is probably some parameters like `OPEN_MP_THREADS` and the `prange` schedule that need to be tweaked.
+
+
+## Docker
+
+You can use docker to play with implementations or rerun the speed test or graph creation code.
+
+```
+docker build -t manhattan_distance .
+docker run -it manhattan_distance
+```
+
+This will drop you into a python shell with the software installed.
+
+Use
+
+```
+docker run -it manhattan_distance /bin/bash
+conda activate MIPy
+```
+
+to get a bash shell to run scripts.
