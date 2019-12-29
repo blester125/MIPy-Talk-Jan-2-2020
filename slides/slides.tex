@@ -110,7 +110,7 @@
         \begin{itemize}
             \item Distance if you can only move along the axes
             \item Contrast with euclidean distance where we can move diagonally and go straight there.
-            \item Like you have directions to somewhere in manhattan, you can't walk through a building, you need to walk along the streets
+            \item Like you have directions to somewhere in manhattan, you can't smash through a building, you need to drive along the streets
         \end{itemize}
     }
 \end{frame}
@@ -119,8 +119,18 @@
     \begin{center}
         \includegraphics[width=0.9\textwidth]{images/manhattan.png}
     \end{center}
-    \note<1>[item]{Here we can see example of moving between points as the Manhattan distance does}
-    \note<2>[item]{As suggested by the calculation for Manhattan Distance all of these paths have the same length, we'll look at why this is}
+    \note<1>{
+        \begin{itemize}
+            \item Here we can see example of moving between points as the Manhattan distance does
+        \end{itemize}
+    }
+    \note<2>{
+        \begin{itemize}
+            \item As suggested by the calculation for Manhattan Distance all of these paths have the same length, the next few slides sketch out why these are all the same but that isn't very important to us
+            \item Point out the absolute distance between point dims on the red line, $6$ up $6$ over for a distance of $12$
+            \item All paths are length $12$
+        \end{itemize}
+    }
 \end{frame}
 
 \againframe<2->{md}
@@ -179,7 +189,7 @@
     \end{columns}
     \note{
         \begin{itemize}
-            \item  DB is a transversal of both sets of parallel lines
+            \item DB is a transversal of both sets of parallel lines
             \item ABD and CDB are congruent because they are alternate interior angles
             \item ADB and DBC are congruent because they are alternate interior angles
             \item It is the same length as itself
@@ -191,8 +201,28 @@
 \end{frame}
 
 \begin{frame}
-    \frametitle{Proof of Equal Paths}
-    Let $R$ be a move $1$ step \textit{right} and $U$ be a move $1$ step \textit{up}
+    \frametitle{All Paths Equal}
+    \begin{itemize}
+        \item Let $R$ be a move $1$ step \textit{right} and $U$ be a move $1$ step \textit{up}. \\
+        \item Let the source point be $(0, 0)$ in our new coordinate system and the target be $(p, q)$. \\
+        \item Any possible path from source to target will have $p$ $R$ moves and $q$ $U$ moves. \\
+        \item There are $p + q$ moves in total. \\
+        \item There are $\begin{pmatrix}
+                p + q \\
+                p
+              \end{pmatrix}$ possible paths all of the same length
+        \item If you make an extra $R$ or $U$ move you will not be at your target and will need to make extra steps so it will not be the shortest path.
+    \end{itemize}
+    \note{
+        \begin{itemize}
+            \item This is a quick overview on why all paths between two points have the same length
+            \item You can scramble the order of moves and the path still has the same number of $R$s and $U$s but ends at the same spot
+            \item It also sketches why the path length is always the length + height of the rectangle we make with the points as boxes
+            \item This matches the formula where we take the absolute difference between points and sum across dimensions
+            \item you can have a more rigorous proof via induction / contradiction that is based on the fact that if there was any shorter way to get to the next point then we could have gotten to this point through that but I didn't write it out here.
+            \item The basic point is that because all paths are equal we can just look at the differences between the start and end, we don't need to care about the path take there.
+        \end{itemize}
+    }
 \end{frame}
 
 \end{subsection} %Manhattan Distance
@@ -231,8 +261,8 @@
     \begin{itemize}
         \item<1-> \href{https://cython.org/}{Cython} is a compiler for Python and Cython
         \item<2-> It creates C extensions
-        \item<3-> It looks more like python than C, but adds types
-        \item<4-> You can call python code from inside the C extension
+        \item<3-> Cython is also a language that looks more like python than C, but adds types
+        \item<4-> You can call python code from inside the cython code (and therefor from inside the C extension)
         \item<5-> It can compile pure python code
         \item<6-> Makes it easy to wrap C libraries
         \item<7-> Some large libraries like \href{https://spacy.io/}{SpaCy} are all cython
@@ -269,7 +299,7 @@ def pairwise_manhattan_python_v1(
     # For each pair of points
     for x in points:
         dists = []
-        for y points:
+        for y in points:
             # Manhattan distance
             dist.append(
                 sum(abs(x_i - y_i) for x_i, y_i in zip(x, y))
@@ -284,17 +314,8 @@ def pairwise_manhattan_python_v1(
     \note<1>{
         \begin{itemize}
             \item It is 2020, python2 is dead, lets all start using type hints
-            \item This is the most brute force apprach, for all combinations of points calculate the manhattan distance
             \item Input is a list of $N$ points where each point is a List of $M$ integers
-        \end{itemize}
-    }
-    \note<3>{
-        \begin{itemize}
-            \item When optimizing you want to save all the time you can in the inner most loop
-            \item every second wasted in the setup is only wasted once
-            \item every second wasted in the inner loop is wasted over and over
-            \item Python function calls have overhead so by manually inlining the Manhattan Distance calculation we get a speed up
-            \item Without in-lining we pay for the all $\BigO(N^2)$ times
+            \item This is the most brute force approach, for all combinations of points calculate the Manhattan distance
         \end{itemize}
     }
     \note<2>{
@@ -304,6 +325,15 @@ def pairwise_manhattan_python_v1(
             \item for $y$ in points $\rightarrow$ a loop over $N$ points for each point in the $N$ points, $\BigO(N^2)$
             \item for $x_i$, $y_i$ in zip($x$, $y$) $\rightarrow$ a loop over $M$ dimentions, $\BigO(N^2M)$
             \item Memory used is $\BigO(N^2)$ for the result matrix, external memory datastructures are not used
+        \end{itemize}
+    }
+    \note<3>{
+        \begin{itemize}
+            \item When optimizing you want to save all the time you can in the inner most loop
+            \item every second wasted in the setup is only wasted once
+            \item every second wasted in the inner loop is wasted over and over
+            \item Python function calls have overhead so by manually inlining the Manhattan Distance calculation we get a speed up
+            \item Without in-lining we pay for the call overhead $\BigO(N^2)$ times
         \end{itemize}
     }
 \end{frame}
@@ -346,7 +376,7 @@ def pairwise_manhattan_python_v2(
     \end{pythoncode}
     \note<1>{
         \begin{itemize}
-            \item This is the only algorithmic improvemnt so our code
+            \item This is the only algorithmic improvemnt (not really, Big O is still the same but we are cutting out work) to our code
             \item The rest of our improvements are all computational should all show similar speed curves
             \item The Manhattan distance is symetric ($\md(X, Y) = \md(Y,X)$)
             \item The distance from point i to point j is the same as the distance from point j to point i
@@ -357,6 +387,7 @@ def pairwise_manhattan_python_v2(
             \item We can reuse the result from one direction and skip computing it for the other
             \item Big O throws away constants so the is still $\BigO(N^2M)$
             \item We could use a similar trick to reduce memory usage by just having user of the results always index with some rule where the tuple of points need to be sorted or something similar, not worth it so still $\BigO(N^2)$ in memory.
+            \item You could optimize a little bit here by initalizing the results matrix with zeros and skipping computing your distance to your self.
         \end{itemize}
     }
 \end{frame}
@@ -501,7 +532,7 @@ def pairwise_manhattan_numpy_v2(
     \note<2>{
         \begin{itemize}
             \item Then only thing we are vectorizing here is the manhattan distance calculation
-            \item We expect this to be able the same speed as the python v2 as we grow the number of points
+            \item We expect this to be about the same speed as the python v2 as we grow the number of points
             \item We expect this to show speed gains as we increase the number of dimensions
         \end{itemize}
     }
@@ -520,7 +551,7 @@ def pairwise_manhattan_numpy_v2(
     }
     \note<2>{
         \begin{itemize}
-            \item points i is an $M$ dimensional point
+            \item points $i$ and $j$ are $M$ dimensional points
             \item The subtraction and the \texttt{np.abs} is a vectorized function
             \item The \texttt{np.sum} is a reduction
         \end{itemize}
@@ -541,9 +572,9 @@ def pairwise_manhattan_numpy_v2(
     \end{pythoncode}
     \note{
         \begin{itemize}
-            \item The name implies it might be parallel processing but that depends on the back end choices
             \item A large part of performant python is trying to remove loops by vectorizing code
-            \item Vectorization generally does these element wise applications but there are reductions too which we will see
+            \item The name implies it might be parallel processing but that depends on the back end choices
+            \item Vectorization generally does these element wise applications but there are also reductions
         \end{itemize}
     }
 \end{frame}
@@ -628,7 +659,7 @@ def pairwise_manhattan_numpy_v3(points: np.ndarray) -> np.ndarray:
             \item Reducing \texttt{[N, M]} over axis 1 gives us \texttt{N}
             \item Results is a list of vectors of size $N$
             \item \texttt{np.stack} puts them on top of each other to form a single matrix
-            \item Typing for array shapes has no support which sucks, there are shapes that are expected to make the broadcasting work but you can't communicate these compatibilities with type hints
+            \item Typing for array shapes has no support which sucks, there are shapes that are expected to make the broadcasting work but you can't communicate these constraints with type hints
         \end{itemize}
     }
 \end{frame}
@@ -638,12 +669,12 @@ def pairwise_manhattan_numpy_v3(points: np.ndarray) -> np.ndarray:
     \begin{itemize}
         \item<1-> Vectorization can speed up code
         \item<2-> But what do I do when the shapes don't match?
-        \item<3-> If i was to add a scalar to a vector do I have to copy the scalar into a vector to vectorize it?
+        \item<3-> If i want to add a scalar to a vector do I have to copy the scalar into a vector to vectorize it?
         \item<4-> Broadcasting to the rescue!
     \end{itemize}
     \note{
         \begin{itemize}
-            \item Copying would be a waste of memory, need to have it multiple times and computation, time taken to make the copies
+            \item Copying would be a waste of memory (need to have the scalar multiple times) and computation (time taken to make the copies of the scalar)
         \end{itemize}
     }
 \end{frame}
@@ -668,6 +699,13 @@ def pairwise_manhattan_numpy_v3(points: np.ndarray) -> np.ndarray:
         \item If size at some dimension don't match the one that is equal to $1$ is repeated to match the other shape.
         \item If there is a mismatch and neither size is $1$ an exception is thrown.
     \end{enumerate}
+    \note{
+        \begin{enumerate}
+            \item $2x3 + 3 \rightarrow 2x3 + 1x3$
+            \item $5x4 + 5x1 \rightarrow 5x4 + 5x4$
+            \item $3x4 + 4x3 \rightarrow \text{ERROR}$
+        \end{enumerate}
+    }
 \end{frame}
 
 \begin{frame}
@@ -814,7 +852,7 @@ def pairwise_manhattan_numpy_v4(points: np.ndarray) -> np.ndarray:
             \item All the loops are gone!
             \item We add a dimension of size $1$ into the points
             \item When we do the subtraction the points \texttt{[N, M]} is expanded to \texttt{[1, N, M]}
-            \item \texttt{[N. 1. M]} + \texttt{[1, N, N]} $\rightarrow$ \texttt{[N, N, M]}
+            \item \texttt{[N, 1, M]} + \texttt{[1, N, M]} $\rightarrow$ \texttt{[N, N, M]}
             \item Reduction over axis $-1$ (same as negative indexing in python, sum over the last dim)
             \item Reduction gives us \texttt{[N, N]} aka our answer
         \end{itemize}
@@ -825,7 +863,7 @@ def pairwise_manhattan_numpy_v4(points: np.ndarray) -> np.ndarray:
 
 \begin{subsection}{Cython}
 
-\begin{frame}[fragile,label=cython]
+\begin{frame}<1>[fragile,label=cython]
     \frametitle{Cython Implementation}
     \begin{cythoncode}
 @cython.wraparound(False)
@@ -845,17 +883,18 @@ cpdef int[:, :] pairwise_manhattan(int[:, :] points):
             results_view[j, i] = dist
     return results
     \end{cythoncode}
-    \note<1->{
+    \note<1>{
         \begin{itemize}
             \item The cython code looks a lot like our original python code
-            \item we can just write loops, we don't have to thing about vectorization
+            \item we can just write loops, we don't have to think about vectorization
             \item There are a lot of annotations that help speed things up.
         \end{itemize}
     }
     \note<2->{
         \begin{itemize}
-            \item There are a lot of optimizations left of the table, for example operating on 4 points at a time in the inner loops for better cache coherence
-            \item This kind of optimizations are very hard (impossible) to express with NumPy
+            \item There are a lot of optimizations left of the table, for example operating on batch points at a time in the inner loops for better cache coherence
+            \item we could skip computing the distance to ourselves because we know it is zero
+            \item These kind of optimizations are very hard (impossible) to express with NumPy
         \end{itemize}
     }
 \end{frame}
@@ -905,8 +944,8 @@ cpdef int[:, :] pairwise_manhattan(int[:, :] points):
             \item \texttt{cdef} is used to statically declare variables. This tells the compiler what the type is so it can compile it to C.
             \item \texttt{int[:, :]} is a typed memoryview
             \item a type memoryview is a look into the memory of an object that supports the buffer interface
-            \item buffer interface is way that objects can layout their memory of other things can access the content. NumPy arrayssupport this interface
-            \item results is actually a dynamically created numpy array, it it known to the python interpreter, the gil is needed to make it, and the ref counter is incremented by one when we make it, Making it so easy to create python objects is a strength of cython
+            \item buffer interface is way that objects will organize their memory layout so other things can access the content. NumPy arrays support this interface
+            \item results is actually a dynamically created numpy array, it it known to the python interpreter, the gil is needed to make it, the ref counter is incremented by one when we make it, and result will be safe to use in python functions after we erturn it. Making it so easy to create python objects is a strength of cython
             \item results view is a typed memory view of the underlying memory of results, this lets us access from C, without gil
         \end{itemize}
     }
@@ -921,7 +960,7 @@ cpdef int[:, :] pairwise_manhattan(int[:, :] points):
     @cython.wraparound(False)
     @cython.boundscheck(False)
     cdef inline int manhattan_distance(int[:] x, int[:] y):
-        cdef iint i
+        cdef int i
         cdef int m = x.shape[0]
         cdef int dist = 0
         for i in range(m):
@@ -930,10 +969,10 @@ cpdef int[:, :] pairwise_manhattan(int[:, :] points):
     \end{cythoncode}
     \note{
         \begin{itemize}
-            \item I didn't do this in the code so it looks like the others
+            \item I didn't do this in the code so it looks like the others but I would if this was real production code.
             \item cdef means this is only callable from cython but it has fast C function calls instead of slow python calls
             \item the inline keyword means when this is complied this code is directly insearted, not called as a function
-            \item This gives us the speed of having code inline but the reusablilty/nice SWE of having a seperate function for it.
+            \item This gives us the speed of having code inline but the reusablilty/nice SWE practice of having a seperate function for it.
             \item We import \texttt{abs} from the C standard library so we always use the C version, if not cython will swap the version (C vs python) based on the datatypes and we wouldn't be able to release the GIL
         \end{itemize}
     }
@@ -1003,8 +1042,8 @@ cpdef int[:, :] pairwise_manhattan(int[:, :] points):
         \item If you have a custom use case cython can often beat the more general NumPy solution
     \end{itemize}
     \begin{itemize}
-        \item Not in this talk but Cython also supports defining objects and structs which makes it amenable to speeding up code that isn't all numeric arrays
-        \item Numba and NumPy are basically array only if you want speed.
+        \item We didn't use it but Cython also supports defining objects and structs which makes it amenable to speeding up code that isn't all numeric arrays
+        \item NumPy is basically array only if you want speed.
     \end{itemize}
 \end{frame}
 
