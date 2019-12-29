@@ -63,6 +63,18 @@ def pairwise_manhattan_numpy_v3(points: np.ndarray) -> np.ndarray:
     return np.stack(results)
 
 
+def pairwise_manhattan_numpy_broadcast_cached(points: np.ndarray) -> np.ndarray:
+    results = np.zeros((len(points), len(points)), dtype=np.int32)
+    dists = []
+    for i in range(len(points)):
+        dists.append(np.sum(np.abs(points[i] - points[i:]), axis=-1))
+    for i, dist in enumerate(dists):
+        results[i, i:] = dist
+    i_lower = np.tril_indices(len(points), -1)
+    results[i_lower] = results.T[i_lower]
+    return results
+
+
 def pairwise_manhattan_numpy_v4(points: np.ndarray) -> np.ndarray:
     # return np.sum(np.abs(np.expand_dims(points, 1) - np.expand_dims(points, 0)), axis=-1)
     return np.sum(np.abs(points[:, None] - points), axis=-1)

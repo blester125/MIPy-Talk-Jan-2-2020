@@ -10,6 +10,7 @@ from pairwise_manhattan import (
     pairwise_manhattan_numpy_v2,
     pairwise_manhattan_numpy_v3,
     pairwise_manhattan_numpy_v4,
+    pairwise_manhattan_numpy_broadcast_cached,
     pairwise_manhattan_cython,
 )
 
@@ -57,6 +58,7 @@ def test_pairwise_manhattan_all_equal(points):
     results.append(pairwise_manhattan_numpy_v2(points))
     points = np.stack(points)
     results.append(pairwise_manhattan_numpy_v3(points))
+    results.append(pairwise_manhattan_numpy_broadcast_cached(points))
     results.append(pairwise_manhattan_numpy_v4(points))
     results = [np.array(r, dtype=np.int32) for r in results]
     for i, j in combinations(results, 2):

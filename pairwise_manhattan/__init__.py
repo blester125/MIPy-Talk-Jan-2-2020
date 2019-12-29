@@ -7,6 +7,7 @@ from pairwise_manhattan.pairwise_manhattan import (
     pairwise_manhattan_numpy_v1,
     pairwise_manhattan_numpy_v2,
     pairwise_manhattan_numpy_v3,
+    pairwise_manhattan_numpy_broadcast_cached,
     pairwise_manhattan_numpy_v4,
 )
 

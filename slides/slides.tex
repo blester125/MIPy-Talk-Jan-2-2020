@@ -637,7 +637,7 @@ def pairwise_manhattan_numpy_v2(
 def pairwise_manhattan_numpy_v3(points: np.ndarray) -> np.ndarray:
     results = []
     for i in range(len(points)):
-        results.append(np.sum(np.abs(points[i] - points), axis=-1))
+        results.append(np.sum(np.abs(points[i] - points), axis=1))
     return np.stack(results)
     \end{pythoncode}
     \note<1>{
@@ -661,7 +661,12 @@ def pairwise_manhattan_numpy_v3(points: np.ndarray) -> np.ndarray:
             \item Reducing \texttt{[N, M]} over axis 1 gives us \texttt{N}
             \item Results is a list of vectors of size $N$
             \item \texttt{np.stack} puts them on top of each other to form a single matrix
-            \item Typing for array shapes has no support which sucks, there are shapes that are expected to make the broadcasting work but you can't communicate these constraints with type hints
+            \item Side Note: Type hints for array shapes has no support which sucks. To make broadcasting work you often need specific shapes but you can't communicate these constraints via type hints
+        \end{itemize}
+    }
+    \note<4>{
+        \begin{itemize}
+            \item One thing to notice here is that 
         \end{itemize}
     }
 \end{frame}
@@ -892,7 +897,7 @@ def pairwise_manhattan_numpy_v3(points: np.ndarray) -> np.ndarray:
     }
 \end{frame}
 
-\againframe<3>{numpy_v3}
+\againframe<3->{numpy_v3}
 
 \begin{frame}[fragile]
     \frametitle{Numpy Double Broadcast}
@@ -902,7 +907,11 @@ def pairwise_manhattan_numpy_v4(points: np.ndarray) -> np.ndarray:
     exp_points = np.expand_dims(points, 1)  # [N, 1, M]
     return np.sum(np.abs(exp_points - points), axis=-1)
     \end{pythoncode}
-    \note{
+    \begin{itemize}
+        \item<3->Still $\BigO(N^2M)$ in runtime
+        \item<3->Now $\BigO(N^2M)$ in memory
+    \end{itemize}
+    \note<1>{
         \begin{itemize}
             \item All the loops are gone!
             \item We add a dimension of size $1$ into the points
@@ -910,6 +919,19 @@ def pairwise_manhattan_numpy_v4(points: np.ndarray) -> np.ndarray:
             \item \texttt{[N, 1, M]} + \texttt{[1, N, M]} $\rightarrow$ \texttt{[N, N, M]}
             \item Reduction over axis $-1$ (same as negative indexing in python, sum over the last dim)
             \item Reduction gives us \texttt{[N, N]} aka our answer
+        \end{itemize}
+    }
+    \note<2>{
+        \begin{itemize}
+            \item Now that we are double broadcasting there is no way to express the fact that we can skip the repeated work of calculating the distance between flipped points.
+        \end{itemize}
+    }
+    \note<3->{
+        \begin{itemize}
+            \item We are going to revisit Big-O for this implementation
+            \item The runtime is still the same, remember the loops are still there, they are just in C not python
+            \item We have this itermediate result of size \texttt{[N, N, M]} so our memory usage is higher
+            \item We'll see that this extra memory usage can cause problems later.
         \end{itemize}
     }
 \end{frame}
