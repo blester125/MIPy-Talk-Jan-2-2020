@@ -666,7 +666,7 @@ def pairwise_manhattan_numpy_v3(points: np.ndarray) -> np.ndarray:
     }
     \note<4>{
         \begin{itemize}
-            \item One thing to notice here is that 
+            \item One thing to notice here is that we are back to doing redundant computation by calculating all pairs of points!
         \end{itemize}
     }
 \end{frame}
@@ -898,6 +898,38 @@ def pairwise_manhattan_numpy_v3(points: np.ndarray) -> np.ndarray:
 \end{frame}
 
 \againframe<3->{numpy_v3}
+
+\begin{frame}[fragile]
+    \frametitle{Numpy Broadcast Cached}
+
+    \begin{pythoncode}
+def pairwise_manhattan_numpy_broadcast_cached(
+    points: np.ndarray
+) -> np.ndarray:
+    results = np.zeros((len(points), len(points)), dtype=np.int32)
+    dists = []
+    for i in range(len(points)):
+        dists.append(np.sum(np.abs(points[i] - points[i:]), axis=1))
+    for i, dist in enumerate(dists):
+        results[i, i:] = dist
+    return results + results.T
+    \end{pythoncode}
+    \note{
+        \begin{itemize}
+            \item Here we are back to preallocating our results
+            \item When we compute the distances we only compute before by slicing the points matrix
+            \item We get back a list of tensors that are not the same shape (each one is on smaller than the previous)
+            \item In python we copy these into the regular matrix so that it is a upper triangular matrix
+            \begin{itemize}
+                \item Upper triangular matrix means it only has values above the diagonal
+                \item Only value when the column index $j$ is $\ge$ the row index $i$
+            \end{itemize}
+            \item We transpose (the rows become columns and columns rows) and add. Because we are upper triangle we just copy the values over (the previous values are zero)
+            \item This would double the diag values but because we know Manhattan distance is $0$ with ourselves the diag will stay $0$
+            \item Even though we have slow python loops at large values we are saving so much computation it is worth it
+        \end{itemize}
+    }
+\end{frame}
 
 \begin{frame}[fragile]
     \frametitle{Numpy Double Broadcast}
