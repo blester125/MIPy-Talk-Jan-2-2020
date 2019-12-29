@@ -262,7 +262,7 @@
         \item<1-> \href{https://cython.org/}{Cython} is a compiler for Python and Cython
         \item<2-> It creates C extensions
         \item<3-> Cython is also a language that looks more like python than C, but adds types
-        \item<4-> You can call python code from inside the cython code (and therefor from inside the C extension)
+        \item<4-> You can call python code from inside the cython code (and therefore from inside the C extension)
         \item<5-> It can compile pure python code
         \item<6-> Makes it easy to wrap C libraries
         \item<7-> Some large libraries like \href{https://spacy.io/}{SpaCy} are all cython
@@ -696,7 +696,7 @@ def pairwise_manhattan_numpy_v3(points: np.ndarray) -> np.ndarray:
     \frametitle{Broadcasting Rules}
     \begin{enumerate}
         \item If there is a mismatch in dimensions the one with fewer is padded with $1$ on its leading side.
-        \item If size at some dimension don't match the one that is equal to $1$ is repeated to match the other shape.
+        \item If the size of some dimension doesn't match and one of the sizes is $1$ it is repeated to match the other size.
         \item If there is a mismatch and neither size is $1$ an exception is thrown.
     \end{enumerate}
     \note{
@@ -1032,6 +1032,24 @@ cpdef int[:, :] pairwise_manhattan(int[:, :] points):
 
 \end{section} %Results
 
+\begin{frame}
+    \frametitle{Interactive Cython}
+    \begin{itemize}
+        \item Cython is a compilied Language
+        \item This makes rapid iteration harder than in python
+        \item Jupyter notebooks have nice cython features to speed up exploratory work
+        \item Notebook: \href{https://www.google.com}{Jupyter Notebook}
+    \end{itemize}
+    \note{
+        \begin{itemize}
+            \item Cython C extensions are normally built via the \texttt{setup.py} file
+            \item A change in cython code isn't reflected until you recompile it
+            \item I am not a huge fan of jupyter notebooks but they can compile cython code for to allow for quick iteration
+            \item Show the notebook
+        \end{itemize}
+    }
+\end{frame}
+
 \begin{section}{Conclusion}
 
 \begin{frame}
@@ -1050,8 +1068,8 @@ cpdef int[:, :] pairwise_manhattan(int[:, :] points):
 \begin{frame}
     \frametitle{Links}
     \begin{itemize}
-        \item Notebook: \href{https://www.google.com}{NBViewer Link}
-        \item Slides: \href{https://github.com/blester125/MIPy-Talk-Jan-2-2019/blob/master/slides/slides.pdf}{Link to slides}
+        \item Notebook: \href{https://www.google.com}{Jupyter Notebook}
+        \item Slides: \href{https://github.com/blester125/MIPy-Talk-Jan-2-2020/blob/master/slides/slides.pdf}{https://github.com/blester125/MIPy-Talk-Jan-2-2020/blob/master/slides/slides.pdf}
         \item Twitter: \href{https://twitter.com/BrianLester125}{https://twitter.com/BrianLester125}
         \item GitHub: \href{https://github.com/blester125}{https://github.com/blester125}
     \end{itemize}
