@@ -84,7 +84,7 @@
     \frametitle{The Problem}
     \begin{center}
     \begin{figure}
-        \includegraphics[width=\linewidth]{images/problem.png}
+        \includegraphics[width=\textwidth]{images/problem.png}
         \caption{\href{https://a2mads.herokuapp.com/}{Ann Arbor Machine Learning and Data Science Slack}}
     \end{figure}
     \end{center}
@@ -191,7 +191,8 @@
 \end{frame}
 
 \begin{frame}
-    \frametitle{Proof of Shortest Path}
+    \frametitle{Proof of Equal Paths}
+    Let $R$ be a move $1$ step \textit{right} and $U$ be a move $1$ step \textit{up}
 \end{frame}
 
 \end{subsection} %Manhattan Distance
@@ -569,10 +570,13 @@ def pairwise_manhattan_numpy_v2(
 \againframe<2>{numpy_v2}
 
 \begin{frame}
-    \includegraphics[width=\linewidth]{images/timing-vs-dims-at-100.png}
+    \makebox[\textwidth][c]{
+        \includegraphics[width=0.98\paperwidth]{images/timing-vs-dims-at-100.png}
+    }
     \note{
         \begin{itemize}
             \item This is a plot of the timing vs the number of dimentions in a point.
+            \item Graphs created by running each implementation on randomly generated data (same data across implemetations) 5 times. The point it the mean of the times and the error bar is the standard dev of the times.
             \item For the \texttt{python\_brute} and \texttt{python\_cached} implementations we can see the predicted $\BigO(M)$ growth.
             \item At small input sizes we can see there is some overhead for converting lists into numpy that counteracts the
                 advangate of vectorization
@@ -581,10 +585,14 @@ def pairwise_manhattan_numpy_v2(
 \end{frame}
 
 \begin{frame}
-    \includegraphics[width=\linewidth]{images/timing-vs-dims-at-100.png}
+    \makebox[\textwidth][c]{
+        \includegraphics[width=0.98\paperwidth]{images/numpy-dims.png}
+    }
     \note{
         \begin{itemize}
-            \item
+            \item Here we can see the same $\BigO(M)$ growth for numpy implemenetations where we have vectorized the manhattan distance
+            \item This highlights how we are making computational improvments, not algorithmic ones
+            \item I had to scale out to a lot more points to see this trend
         \end{itemize}
     }
 \end{frame}
@@ -939,20 +947,50 @@ cpdef int[:, :] pairwise_manhattan(int[:, :] points):
 \begin{section}{Results}
 
 \begin{frame}
-    \frametitle{Scaling in the Number of Points}
+    \makebox[\textwidth][c]{
+        \includegraphics[width=0.98\paperwidth]{images/timing-vs-points-10000-all-impls.png}
+    }
+    \note{
+        \begin{itemize}
+            \item Here we can see the timing curves of various implemetations as we scale up the number of points.
+            \item We can see the $\BigO(N^2M)$ growth for our algos
+            \item The numpy broadcasting, scipy, and cython solutions are hard to see, we'll zoom in
+        \end{itemize}
+    }
 \end{frame}
 
 \begin{frame}
-    \frametitle{Scaling in the Number of Points (subset)}
+    \makebox[\textwidth][c]{
+        \includegraphics[width=0.98\paperwidth]{images/timing-vs-points-40000-some-impls.png}
+    }
+    \note{
+        \begin{itemize}
+            \item Here we are looking at only some implementations
+            \begin{itemize}
+                \item \texttt{numpy\_broadcast}
+                \item \texttt{numpy\_double\_broadcast}
+                \item \texttt{scipy}
+                \item \texttt{cython}
+            \end{itemize}
+            \item We can start to see the $\BigO(N^2M)$ growth
+        \end{itemize}
+    }
 \end{frame}
 
 \begin{frame}
-    \frametitle{Scaling in the Number of Dimensions}
+    \makebox[\textwidth][c]{
+        \includegraphics[width=0.98\paperwidth]{images/timing-vs-points-80000-cython.png}
+    }
+    \note{
+        \begin{itemize}
+            \item Finally we are scaling out to a lot of points.
+            \item \texttt{cython} only
+            \item the $\BigO(N^2M)$ growth is obvious
+            \item We are at 8 times as many points but only a thrid of the runtime as the python impl
+        \end{itemize}
+    }
 \end{frame}
 
-\begin{frame}
-    \frametitle{Timing Curves}
-\end{frame}
 \end{section} %Results
 
 \begin{section}{Conclusion}

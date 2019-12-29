@@ -59,7 +59,7 @@ def main():
         pairwise_manhattan_numpy_v2, [np.array(d, dtype=np.int32) for d in data], args.trials
     )
     timings["numpy_broadcast"] = speed_test(pairwise_manhattan_numpy_v3, np.array(data, np.int32), args.trials)
-    timings["numpy_double_broadcast"] = speed_test(pairwise_manhattan_numpy_v3, np.array(data, np.int32), args.trials)
+    timings["numpy_double_broadcast"] = speed_test(pairwise_manhattan_numpy_v4, np.array(data, np.int32), args.trials)
     timings["scipy"] = speed_test_scipy(np.array(data, dtype=np.int32), args.trials)
     timings["cython"] = speed_test(pairwise_manhattan_cython, np.array(data, dtype=np.int32), args.trials)
     timings["cython_parallel"] = speed_test(pairwise_manhattan_cython_p, np.array(data, dtype=np.int32), args.trials)
