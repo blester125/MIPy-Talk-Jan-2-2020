@@ -2,7 +2,7 @@
 
 [![Actions Status](https://github.com/blester125/MIPy-Talk-Jan-2-2019/workflows/Unit%20Test/badge.svg)](https://github.com/blester125/MIPy-Talk-Jan-2-2019/actions)
 
-This is the code and [slides](https://github.com/blester125/MIPy-Talk-Jan-2-2020/blob/master/slides/slides.pdf) from my talk at the Michigan Python Meetup on January 2nd 2020.
+This is the code and [slides](https://github.com/blester125/MIPy-Talk-Jan-2-2020/blob/master/slides/slides.pdf) from my talk at the [Michigan Python Meetup on January 2nd 2020.](https://www.meetup.com/Michigan-Python/events/266921043/)
 
 
 ## Install

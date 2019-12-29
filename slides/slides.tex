@@ -260,10 +260,10 @@
     \frametitle{Cython}
     \begin{itemize}
         \item<1-> \href{https://cython.org/}{Cython} is a compiler for Python and Cython
-        \item<2-> It creates C extensions
-        \item<3-> Cython is also a language that looks more like python than C, but adds types
-        \item<4-> You can call python code from inside the cython code (and therefore from inside the C extension)
-        \item<5-> It can compile pure python code
+        \item<2-> Cython is also a language that looks more like python than C, but adds types
+        \item<3-> It creates C extensions
+        \item<4-> It can compile pure python code
+        \item<5-> You can call python code from inside the cython code (and therefore from inside the C extension)
         \item<6-> Makes it easy to wrap C libraries
         \item<7-> Some large libraries like \href{https://spacy.io/}{SpaCy} are all cython
     \end{itemize}
@@ -272,6 +272,7 @@
             \item Cython is a superset of python, adds things like static types
             \item Compiling just python gives a slight speed boost
             \item You can also write code that releases the GIL so multithreading is possible
+            \item We will see an example of why calling python code is nice
         \end{itemize}
     }
 \end{frame}
@@ -413,6 +414,9 @@ def pairwise_manhattan_python_v2(
     \note{
         \begin{itemize}
             \item The Manhattan distance is a distance metric and it be one mathematically it needs to be symmetrical but we can see why here
+            \item The absoulte difference is the same when reversed so the sum is of the same values to the total sum is the same
+        \end{itemize}
+        \begin{itemize}
             \item in the case where the difference is greater than one
             \item The switched must be negative
             \item Because we are positive value is just the difference
@@ -442,7 +446,6 @@ def pairwise_manhattan_python_v2(
     \end{proof}
     \note{
         \begin{itemize}
-            \item The Manhattan distance is a distance metric and it be one mathematically it needs to be symmetrical but we can see why here
             \item in the case where the difference is less than one
             \item The switched must be positive
             \item Our result if the difference multiplied by $-1$ because it negative and need to be positive
@@ -470,11 +473,7 @@ def pairwise_manhattan_python_v2(
     \end{proof}
     \note{
         \begin{itemize}
-            \item The Manhattan distance is a distance metric and it be one mathematically it needs to be symmetrical but we can see why here
             \item In the case we are zero the switch is zero so we have the same value.
-        \end{itemize}
-        \begin{itemize}
-            \item The absoulte difference is the same when reversed so the sum is of the same values to the total sum is the same
         \end{itemize}
     }
 \end{frame}
@@ -562,7 +561,6 @@ def pairwise_manhattan_numpy_v2(
     \frametitle{Vectorization}
     \begin{itemize}
         \item Code that can transparently operate on lists of numbers
-        \item Moves the loops out of slow python into fast C
     \end{itemize}
     \begin{pythoncode}
         def add(x, y):
@@ -570,6 +568,9 @@ def pairwise_manhattan_numpy_v2(
                 return [x_i + y_i for x, y in zip(x, y)]
             return x + y
     \end{pythoncode}
+    \begin{itemize}
+        \item Moves the loops out of slow python into fast C
+    \end{itemize}
     \note{
         \begin{itemize}
             \item A large part of performant python is trying to remove loops by vectorizing code
@@ -586,8 +587,8 @@ def pairwise_manhattan_numpy_v2(
         \item Reduces a list into a scalar by performing some operation
     \end{itemize}
     \begin{pythoncode}
-        def sum(x):
-            return sum(a for a in x)
+        def mean(x):
+            return sum(a for a in x) / len(x)
     \end{pythoncode}
     \note{
         \begin{itemize}
@@ -623,7 +624,8 @@ def pairwise_manhattan_numpy_v2(
         \begin{itemize}
             \item Here we can see the same $\BigO(M)$ growth for numpy implemenetations where we have vectorized the manhattan distance
             \item This highlights how we are making computational improvments, not algorithmic ones
-            \item I had to scale out to a lot more points to see this trend
+            \item I had to scale out to a lot more points to see this trend because when python code is in the graph it looks flat
+            \item Note the very different scale on the y-axis
         \end{itemize}
     }
 \end{frame}
@@ -672,7 +674,7 @@ def pairwise_manhattan_numpy_v3(points: np.ndarray) -> np.ndarray:
         \item<3-> If i want to add a scalar to a vector do I have to copy the scalar into a vector to vectorize it?
         \item<4-> Broadcasting to the rescue!
     \end{itemize}
-    \note{
+    \note<3->{
         \begin{itemize}
             \item Copying would be a waste of memory (need to have the scalar multiple times) and computation (time taken to make the copies of the scalar)
         \end{itemize}
@@ -695,55 +697,80 @@ def pairwise_manhattan_numpy_v3(points: np.ndarray) -> np.ndarray:
 \begin{frame}
     \frametitle{Broadcasting Rules}
     \begin{enumerate}
-        \item If there is a mismatch in dimensions the one with fewer is padded with $1$ on its leading side.
+        \item If there is a mismatch in the number of dimensions the shape with fewer is padded with $1$s on its leading side.
+            \begin{itemize}
+                \item $2 \text{ x } 3 + 3 \rightarrow 2 \text{ x } 3 + 1 \text{ x } 3$
+            \end{itemize}
         \item If the size of some dimension doesn't match and one of the sizes is $1$ it is repeated to match the other size.
+            \begin{itemize}
+                \item $5 \text{ x } 4 + 5 \text{ x } 1 \rightarrow 5 \text{ x } 4 + 5 \text{ x } 4$
+            \end{itemize}
         \item If there is a mismatch and neither size is $1$ an exception is thrown.
+            \begin{itemize}
+                \item $3 \text{ x } 4 + 4 \text{ x } \rightarrow \text{ERROR}$
+            \end{itemize}
     \end{enumerate}
-    \note{
-        \begin{enumerate}
-            \item $2x3 + 3 \rightarrow 2x3 + 1x3$
-            \item $5x4 + 5x1 \rightarrow 5x4 + 5x4$
-            \item $3x4 + 4x3 \rightarrow \text{ERROR}$
-        \end{enumerate}
-    }
 \end{frame}
 
 \begin{frame}
     \frametitle{Broadcasting Examples}
     \begin{center}
     \def\arraystretch{1.5}
-    \begin{tabular}{ c c | c }
-        $ X \in \R^{2 \text{ x } 3} $ & $ Y \in \R^{1 \text{ x } 3} $ & $ X + Y \in R^{2 \text{ x } 3} $ \\
+    \begin{tabular}{ c c c c | c }
+        $X \in \R^{2 \text{ x } 3}$ & $Y \in \R^{1 \text{ x } 3}$ & & $Y' \in \R^{2 \text{ x } 3}$ & $X + Y \in R^{2 \text{ x } 3}$ \\
         $
             \begin{bmatrix}
                 1 & 2 & 3 \\
                 4 & 5 & 6 \\
             \end{bmatrix}
-        $ &
+        $
+        &
         $
             \begin{bmatrix}
             1 & 2 & 1 \\
             \end{bmatrix}
-        $ &
+        $
+        &
+        $\rightarrow$
+        &
+        $
+            \begin{bmatrix}
+            1 & 2 & 1 \\
+            1 & 2 & 1 \\
+            \end{bmatrix}
+        $
+        &
         $
             \begin{bmatrix}
                 2 & 4 & 4 \\
                 5 & 7 & 7 \\
             \end{bmatrix}
         $ \\
-        $ X \in \R^{2 \text{ x } 3} $ & $ Z \in \R^{2 \text{ x } 1} $ & $ X + Z \in R^{2 \text{ x } 3} $ \\
+        & & & & \\
+        $X \in \R^{2 \text{ x } 3}$ & $Z \in \R^{2 \text{ x } 1}$ & & $Z' \in \R^{2 \text{ x } 3}$ & $ X + Z \in R^{2 \text{ x } 3} $ \\
         $
             \begin{bmatrix}
                 1 & 2 & 3 \\
                 4 & 5 & 6 \\
             \end{bmatrix}
-        $ &
+        $
+        &
         $
             \begin{bmatrix}
             2 \\
             3 \\
             \end{bmatrix}
-        $ &
+        $
+        &
+        $\rightarrow$
+        &
+        $
+            \begin{bmatrix}
+                2 & 2 & 2\\
+                3 & 3 & 3\\
+            \end{bmatrix}
+        $
+        &
         $
             \begin{bmatrix}
                 3 & 4 & 5 \\
@@ -763,6 +790,36 @@ def pairwise_manhattan_numpy_v3(points: np.ndarray) -> np.ndarray:
 \end{frame}
 
 \againframe<2>{numpy_v3}
+
+\begin{frame}
+    \frametitle{Multidimensional Reduction}
+    \begin{center}
+        \texttt{y = np.sum(x)}
+    \end{center}
+    \begin{columns}
+        \column{0.5\textwidth}
+            $$ x \in \R^{4 \text{ x } 3} $$
+            \[
+            \begin{bmatrix}
+            1 & 2 & 3 \\
+            4 & 5 & 6 \\
+            7 & 8 & 9 \\
+            10 & 11 & 12 \\
+            \end{bmatrix}
+            \]
+        \column{0.5\textwidth}
+            $$ y \in \R $$
+            \[
+                78
+            \]
+    \end{columns}
+    \note{
+        \begin{itemize}
+            \item We said before that a reduction turned a vector into a scalar, but what about a high dim?
+            \item Without an axis to reduces the whole things, results in $78$
+        \end{itemize}
+    }
+\end{frame}
 
 \begin{frame}
     \frametitle{Reduction Along an Axis}
@@ -794,10 +851,8 @@ def pairwise_manhattan_numpy_v3(points: np.ndarray) -> np.ndarray:
     \end{columns}
     \note{
         \begin{itemize}
-            \item We said before that a reduction turned a vector into a scalar, but what about a high dim?
-            \item Without an axis to reduces the whole things, results in $78$
             \item The axis argument allows for a reduction that only reduces the number of dims by one
-            \item Reduction over the axis 1 is over the columns for matrices
+            \item Reduction over the axis 1 is applied across the columns for matrices resulting in a vector
         \end{itemize}
     }
 \end{frame}
@@ -831,7 +886,7 @@ def pairwise_manhattan_numpy_v3(points: np.ndarray) -> np.ndarray:
     \end{columns}
     \note{
         \begin{itemize}
-            \item Redction over axis 0 is over the rows for matrices
+            \item Reduction over axis 0 is applied across the rows for matrices
             \item There is also a \texttt{keepdims} argument to keep the sinlge dimension of size 1 so instead of getting a vector of size $3$ you get one of size \texttt{[1, 3]}
         \end{itemize}
     }
@@ -895,7 +950,9 @@ cpdef int[:, :] pairwise_manhattan(int[:, :] points):
             \item There are a lot of optimizations left of the table, for example operating on batch points at a time in the inner loops for better cache coherence
             \item we could skip computing the distance to ourselves because we know it is zero
             \item These kind of optimizations are very hard (impossible) to express with NumPy
-        \end{itemize}
+            \item We didn't use it but Cython also supports defining objects and structs which makes it amenable to speeding up code that isn't all numeric arrays
+            \item NumPy is basically array only if you want speed.
+    \end{itemize}
     }
 \end{frame}
 
@@ -994,6 +1051,7 @@ cpdef int[:, :] pairwise_manhattan(int[:, :] points):
             \item Here we can see the timing curves of various implemetations as we scale up the number of points.
             \item We can see the $\BigO(N^2M)$ growth for our algos
             \item The numpy broadcasting, scipy, and cython solutions are hard to see, we'll zoom in
+            \item SciPy is a set of more specific/advanced scientific functions that includes a manhattan distance function
         \end{itemize}
     }
 \end{frame}
@@ -1058,10 +1116,6 @@ cpdef int[:, :] pairwise_manhattan(int[:, :] points):
         \item Vectorization and Broadcasting in NumPy lets us push loops from python into C
         \item Cython lets us write fast loops and is useful for speeding up difficult to vectorize code
         \item If you have a custom use case cython can often beat the more general NumPy solution
-    \end{itemize}
-    \begin{itemize}
-        \item We didn't use it but Cython also supports defining objects and structs which makes it amenable to speeding up code that isn't all numeric arrays
-        \item NumPy is basically array only if you want speed.
     \end{itemize}
 \end{frame}
 
