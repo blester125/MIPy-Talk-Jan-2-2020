@@ -24,9 +24,17 @@ def add_timing_data(file_name: str, points: int, dims: int, df: pd.DataFrame) ->
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Aggregate a collection of timing json files into csv with (impl, points, dims, time) columns.")
-    parser.add_argument("--data-dir", "--data_dir", default="speed_data", help="The directory to read timing data json files from.")
-    parser.add_argument("--output", default=os.path.join("speed_data", "timing.csv"), help="The name of the csv containing the aggregated timing data")
+    parser = argparse.ArgumentParser(
+        description="Aggregate a collection of timing json files into csv with (impl, points, dims, time) columns."
+    )
+    parser.add_argument(
+        "--data-dir", "--data_dir", default="speed_data", help="The directory to read timing data json files from."
+    )
+    parser.add_argument(
+        "--output",
+        default=os.path.join("speed_data", "timing.csv"),
+        help="The name of the csv containing the aggregated timing data.",
+    )
     args = parser.parse_args()
 
     df = pd.DataFrame([], columns=["impl", "points", "dims", "time"])

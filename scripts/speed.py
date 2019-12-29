@@ -39,10 +39,14 @@ def speed_test_scipy(in_: Any, trials: int) -> List[float]:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Collect timing information for some number of points of some dimension")
+    parser = argparse.ArgumentParser(
+        description="Collect timing information for some number of points of some dimension."
+    )
     parser.add_argument("--points", default=10, type=int, help="The number of points to use in this trial.")
     parser.add_argument("--dims", default=2, type=int, help="The number of dimensions in a point to use in this trial.")
-    parser.add_argument("--trials", default=5, type=int, help="The number of times to run this data to get a mean and std.")
+    parser.add_argument(
+        "--trials", default=5, type=int, help="The number of times to run this data to get a mean and std."
+    )
     parser.add_argument("--acc", default=".speed", help="The directory to save the resulting json in.")
     args = parser.parse_args()
 
