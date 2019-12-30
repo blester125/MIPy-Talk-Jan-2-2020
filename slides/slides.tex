@@ -914,7 +914,11 @@ def pairwise_manhattan_numpy_broadcast_cached(
         results[i, i:] = dist
     return results + results.T
     \end{pythoncode}
-    \note{
+    \begin{itemize}
+        \item<2-> Still $\BigO(N^2M)$ runtime.
+        \item<2-> Still $\BigO(N^2)$ memory.
+    \end{itemize}
+    \note<1>{
         \begin{itemize}
             \item Here we are back to preallocating our results
             \item When we compute the distances we only compute before by slicing the points matrix
@@ -924,9 +928,17 @@ def pairwise_manhattan_numpy_broadcast_cached(
                 \item Upper triangular matrix means it only has values above the diagonal
                 \item Only value when the column index $j$ is $\ge$ the row index $i$
             \end{itemize}
-            \item We transpose (the rows become columns and columns rows) and add. Because we are upper triangle we just copy the values over (the previous values are zero)
+        \item We transpose (the rows become columns and columns rows) and add. Because we are upper triangle (lower values are all zero) the add just copies upper values in
             \item This would double the diag values but because we know Manhattan distance is $0$ with ourselves the diag will stay $0$
+        \end{itemize}
+    }
+    \note<2>{
+        \begin{itemize}
+            \item We are adding a loop over the N points (copying the values into the results) $\BigO(N)$
+            \item The addition is $\BigO(N^2)$
+            \item Whole thing is $\BigO(N^2M + N^2 + N)$ but we can throw away extra for Big-O
             \item Even though we have slow python loops at large values we are saving so much computation it is worth it
+            \item Sometimes a strange mix of vectorized and python is the best way.
         \end{itemize}
     }
 \end{frame}
@@ -964,6 +976,23 @@ def pairwise_manhattan_numpy_v4(points: np.ndarray) -> np.ndarray:
             \item The runtime is still the same, remember the loops are still there, they are just in C not python
             \item We have this itermediate result of size \texttt{[N, N, M]} so our memory usage is higher
             \item We'll see that this extra memory usage can cause problems later.
+        \end{itemize}
+    }
+\end{frame}
+
+\begin{frame}
+    \frametitle{Broadcasting Micro Benchmark}
+    \makebox[\textwidth][c]{
+        \includegraphics[width=0.9\paperwidth]{images/microbenchmark-broadcast.png}
+    }
+    \note{
+        \begin{itemize}
+            \item This was a promising implementation in the thread
+            \item Here we can see on a small micro bench mark (4 points of dim 2) that shows a lot of promise
+            \item However when we scale out this solution doesn't work well
+            \item TODO Give memory sizes
+            \item speeds weren't meaningfully different from the single broadcast
+            \item This is an exmaple of why it is important to benchmark in a realistic scenario.
         \end{itemize}
     }
 \end{frame}
