@@ -189,6 +189,7 @@
     \end{columns}
     \note{
         \begin{itemize}
+            \item Quick overview of how on a regular grid you can move around a block in either direction and it will be the same length.
             \item DB is a transversal of both sets of parallel lines
             \item ABD and CDB are congruent because they are alternate interior angles
             \item ADB and DBC are congruent because they are alternate interior angles
@@ -667,6 +668,7 @@ def pairwise_manhattan_numpy_v3(points: np.ndarray) -> np.ndarray:
     \note<4>{
         \begin{itemize}
             \item One thing to notice here is that we are back to doing redundant computation by calculating all pairs of points!
+            \item It is possible to remove this redundency but it will get a lottle weird
         \end{itemize}
     }
 \end{frame}
@@ -789,6 +791,7 @@ def pairwise_manhattan_numpy_v3(points: np.ndarray) -> np.ndarray:
             \item Here we see examples of broadcasting
             \item The first one is broadcasting over the rows
             \item The second one is broadcasting over the columns
+            \item Stress that these copies don't actually happen but computation acts like it did
         \end{itemize}
     }
 
@@ -967,15 +970,14 @@ def pairwise_manhattan_numpy_v4(points: np.ndarray) -> np.ndarray:
     }
     \note<2>{
         \begin{itemize}
-            \item Now that we are double broadcasting there is no way to express the fact that we can skip the repeated work of calculating the distance between flipped points.
+            \item Now that we are double broadcasting there is no way to express the fact that we can skip the repeated work of calculating the distance between symetric pairs of points.
         \end{itemize}
     }
     \note<3->{
         \begin{itemize}
             \item We are going to revisit Big-O for this implementation
             \item The runtime is still the same, remember the loops are still there, they are just in C not python
-            \item We have this itermediate result of size \texttt{[N, N, M]} so our memory usage is higher
-            \item We'll see that this extra memory usage can cause problems later.
+            \item We have this itermediate result of size \texttt{[N, N, M]} so our memory usage is higher. $\BigO(N^2M)$
         \end{itemize}
     }
 \end{frame}
@@ -989,9 +991,26 @@ def pairwise_manhattan_numpy_v4(points: np.ndarray) -> np.ndarray:
         \begin{itemize}
             \item This was a promising implementation in the thread
             \item Here we can see on a small micro bench mark (4 points of dim 2) that shows a lot of promise
-            \item However when we scale out this solution doesn't work well
-            \item TODO Give memory sizes
+            \item However when we scale out this solution doesn't work well due to memory usage
+            \begin{center}
+            \begin{tabular}{| r | r || r | r |}
+                \hline
+                points & dims & Single Memory & Double Memory \\
+                \hline
+                10000 & 2 & 381.47MiB & 762.94MiB \\
+                \hline
+                10000 & 10 & & 3.73GiB \\
+                \hline
+                10000 & 150 & & 55.88GiB \\
+                \hline
+                80000 & 2 & 23.84GiB & 47.68GiB \\
+                \hline
+                80000 & 150 & & 3.49PiB\\
+                \hline
+            \end{tabular}
+            \end{center}
             \item speeds weren't meaningfully different from the single broadcast
+            \item I could only get this version to work for limited points and only a few dimensions.
             \item This is an exmaple of why it is important to benchmark in a realistic scenario.
         \end{itemize}
     }
@@ -1023,9 +1042,9 @@ cpdef int[:, :] pairwise_manhattan(int[:, :] points):
     \end{cythoncode}
     \note<1>{
         \begin{itemize}
-            \item The cython code looks a lot like our original python code
-            \item we can just write loops, we don't have to think about vectorization
+            \item The cython code looks complex but if we zoom in we can see it looks a lot like our original python code
             \item There are a lot of annotations that help speed things up.
+            \item we can just write loops, we don't have to think about vectorization
         \end{itemize}
     }
     \note<2->{
@@ -1050,7 +1069,7 @@ cpdef int[:, :] pairwise_manhattan(int[:, :] points):
             \item These are directives that tell cython how to compile code
             \item \texttt{wrapsround} turns off the ability to do negative indexing
             \item \texttt{boundscheck} turns off rasing an error when you access past the end of an array
-            \item Bpth of these ease of use thing require the length of the array. C arrays don't carry their lengths so we need to ask the python object for the length. Accessing python objects are slow and require the GIL
+            \item Both of these ease of use thing require the length of the array. C arrays don't carry their lengths so we need to ask the python object for the length. Accessing python objects are slow and require the GIL
         \end{itemize}
     }
 \end{frame}
@@ -1083,10 +1102,10 @@ cpdef int[:, :] pairwise_manhattan(int[:, :] points):
         \begin{itemize}
             \item \texttt{cdef} is used to statically declare variables. This tells the compiler what the type is so it can compile it to C.
             \item \texttt{int[:, :]} is a typed memoryview
-            \item a type memoryview is a look into the memory of an object that supports the buffer interface
-            \item buffer interface is way that objects will organize their memory layout so other things can access the content. NumPy arrays support this interface
-            \item results is actually a dynamically created numpy array, it it known to the python interpreter, the gil is needed to make it, the ref counter is incremented by one when we make it, and result will be safe to use in python functions after we erturn it. Making it so easy to create python objects is a strength of cython
-            \item results view is a typed memory view of the underlying memory of results, this lets us access from C, without gil
+            \item a type memoryview is a view of the memory that backs an object that supports the buffer interface
+            \item the buffer interface specific way that an object lays out its data in memory so other things can access the content. Things like NumPy arrays and the stdlib array class support this interface
+            \item \texttt{results} is a dynamically created numpy array, it it known to the python interpreter, the gil is needed to make it, the ref counter is incremented by one when we make it, and it is a python object that will be safe to use in python after we return it. Making dynamic python objects so easily is a strength of cython.
+            \item \texttt{results\_view} is a typed memory view of the memory that holds the underlying data of results. This view lets us access the object from C, without gil
         \end{itemize}
     }
 \end{frame}
@@ -1148,10 +1167,11 @@ cpdef int[:, :] pairwise_manhattan(int[:, :] points):
             \item Here we are looking at only some implementations
             \begin{itemize}
                 \item \texttt{numpy\_broadcast}
-                \item \texttt{numpy\_double\_broadcast}
+                \item \texttt{numpy\_broadcast\_cached}
                 \item \texttt{scipy}
                 \item \texttt{cython}
             \end{itemize}
+            \item As mentioned earlier the double broadcasting solution didn't show meaningful gains over the broadcasting and I actually couldn't get it to run with 100 dimensional points.
             \item We can start to see the $\BigO(N^2M)$ growth
         \end{itemize}
     }
@@ -1187,6 +1207,13 @@ cpdef int[:, :] pairwise_manhattan(int[:, :] points):
             \item A change in cython code isn't reflected until you recompile it
             \item I am not a huge fan of jupyter notebooks but they can compile cython code for to allow for quick iteration
             \item Show the notebook
+            \begin{itemize}
+                \item A python solution
+                \item A cython compiled version of the pure python
+                \item A cython version with types
+                \item shows how just compiling python code can give slight speed boosts
+                \item Vizualization where yellow lines are ones that interact with the python interperter and are therefore slow
+            \end{itemize}
         \end{itemize}
     }
 \end{frame}
@@ -1200,6 +1227,12 @@ cpdef int[:, :] pairwise_manhattan(int[:, :] points):
         \item Cython lets us write fast loops and is useful for speeding up difficult to vectorize code
         \item If you have a custom use case cython can often beat the more general NumPy solution
     \end{itemize}
+    \note{
+        \begin{itemize}
+            \item As we saw in the numpy broadcasting it was a lot of extra work/complexity to remove the redundant computation which is easy in cython.
+            \item As we saw in the numpy double broadcasting we can't remove the redundant computation.
+        \end{itemize}
+    }
 \end{frame}
 
 \begin{frame}
