@@ -267,6 +267,7 @@
         \item<5-> You can call python code from inside the cython code (and therefore from inside the C extension)
         \item<6-> Makes it easy to wrap C libraries
         \item<7-> Some large libraries like \href{https://spacy.io/}{SpaCy} are all cython
+        \item<8-> \texttt{pip install cython}
     \end{itemize}
     \note{
         \begin{itemize}
@@ -378,7 +379,7 @@ def pairwise_manhattan_python_v2(
     \end{pythoncode}
     \note<1>{
         \begin{itemize}
-            \item This is the only algorithmic improvemnt (not really, Big O is still the same but we are cutting out work) to our code
+            \item This is the only algorithmic improvemnt (in that we are doing less work) to our code
             \item The rest of our improvements are all computational should all show similar speed curves
             \item The Manhattan distance is symetric ($\md(X, Y) = \md(Y,X)$)
             \item The distance from point i to point j is the same as the distance from point j to point i
@@ -388,6 +389,7 @@ def pairwise_manhattan_python_v2(
         \begin{itemize}
             \item We can reuse the result from one direction and skip computing it for the other
             \item Big O throws away constants so the is still $\BigO(N^2M)$
+            \item Theoretically this isn't much faster but in parctice because we are skipping so much work it is faster
             \item We could use a similar trick to reduce memory usage by just having user of the results always index with some rule where the tuple of points need to be sorted or something similar, not worth it so still $\BigO(N^2)$ in memory.
             \item You could optimize a little bit here by initalizing the results matrix with zeros and skipping computing your distance to your self.
         \end{itemize}
@@ -714,7 +716,7 @@ def pairwise_manhattan_numpy_v3(points: np.ndarray) -> np.ndarray:
             \end{itemize}
         \item If there is a mismatch and neither size is $1$ an exception is thrown.
             \begin{itemize}
-                \item $3 \text{ x } 4 + 4 \text{ x } \rightarrow \text{ERROR}$
+                \item $3 \text{ x } 4 + 4 \text{ x } 3 \rightarrow \text{ERROR}$
             \end{itemize}
     \end{enumerate}
 \end{frame}
@@ -1099,7 +1101,7 @@ cpdef int[:, :] pairwise_manhattan(int[:, :] points):
     }
 \end{frame}
 
-\begin{frame}[fragile]
+\begin{frame}<-2>[fragile,label=declare]
     \frametitle{Cython Variable Declaration}
     \begin{cythoncode}
         cdef int n = points.shape[0]
@@ -1108,17 +1110,38 @@ cpdef int[:, :] pairwise_manhattan(int[:, :] points):
         cdef int[:, :] results_view = results
         cdef int i, j, k, dist
     \end{cythoncode}
-    \note{
+    \note<1>{
         \begin{itemize}
             \item \texttt{cdef} is used to statically declare variables. This tells the compiler what the type is so it can compile it to C.
+        \end{itemize}
+    }
+    \note<2>{
+        \begin{itemize}
+            \item \texttt{results} is a dynamically created numpy array, it it known to the python interpreter, the gil is needed to make it, the ref counter is incremented by one when we make it, and it is a python object that will be safe to use in python after we return it. Making dynamic python objects so easily is a strength of cython.
+        \end{itemize}
+    }
+    \note<3>{
+        \begin{itemize}
             \item \texttt{int[:, :]} is a typed memoryview
             \item a type memoryview is a view of the memory that backs an object that supports the buffer interface
             \item the buffer interface specific way that an object lays out its data in memory so other things can access the content. Things like NumPy arrays and the stdlib array class support this interface
-            \item \texttt{results} is a dynamically created numpy array, it it known to the python interpreter, the gil is needed to make it, the ref counter is incremented by one when we make it, and it is a python object that will be safe to use in python after we return it. Making dynamic python objects so easily is a strength of cython.
             \item \texttt{results\_view} is a typed memory view of the memory that holds the underlying data of results. This view lets us access the object from C, without gil
         \end{itemize}
     }
 \end{frame}
+
+\begin{frame}
+    \makebox[\textwidth][c]{
+        \includegraphics[width=0.98\paperwidth]{images/create-python-object.png}
+    }
+    \note{
+        \begin{itemize}
+            \item Here we can see some of the code that is generated when creating the results python object. Having to interface with the CPython API like this would be difficult without cython
+        \end{itemize}
+    }
+\end{frame}
+
+\againframe<3>{declare}
 
 \begin{frame}[fragile]
     \frametitle{Cython Manhattan Distance}
@@ -1206,7 +1229,7 @@ cpdef int[:, :] pairwise_manhattan(int[:, :] points):
 \begin{frame}
     \frametitle{Interactive Cython}
     \begin{itemize}
-        \item Cython is a compilied Language
+        \item Cython is a compiled language
         \item This makes rapid iteration harder than in python
         \item Jupyter notebooks have nice cython features to speed up exploratory work
         \item Notebook: \href{https://nbviewer.jupyter.org/github/blester125/MIPy-Talk-Jan-2-2020/blob/master/scripts/cython-jupyter-example.ipynb}{Jupyter Notebook}
@@ -1224,6 +1247,49 @@ cpdef int[:, :] pairwise_manhattan(int[:, :] points):
                 \item shows how just compiling python code can give slight speed boosts
                 \item Vizualization where yellow lines are ones that interact with the python interperter and are therefore slow
             \end{itemize}
+        \end{itemize}
+    }
+\end{frame}
+
+\begin{frame}
+    \makebox[\textwidth][c]{
+        \includegraphics[width=0.98\paperwidth]{images/header.png}
+    }
+    \makebox[\textwidth][c]{
+        \includegraphics[width=0.98\paperwidth]{images/python-compiled.png}
+    }
+    \note{
+        \begin{itemize}
+            \item We use the \texttt{\%load\_ext Cython} magic so our notebook can compile Cython code
+            \item Here we see the pure python implementation being compiled with Cython
+            \item \texttt{\%\%cython -a} compiles the code in this cell and the \texttt{-a} adds annotation to the output
+            \item The annotated view below tells us which lines (yellow) interact with the python interpretor
+            \item General rule of thumb is yellow == slow
+        \end{itemize}
+    }
+\end{frame}
+
+\begin{frame}
+    \makebox[\textwidth][c]{
+        \includegraphics[width=0.98\paperwidth]{images/cython-annotation.png}
+    }
+    \note{
+        \begin{itemize}
+            \item This is the annotated version of the cython code
+            \item We see some yellow, for example creating the \texttt{results} object but this is only dones once
+            \item The whole actual calculation is all white, there is no python, only C
+        \end{itemize}
+    }
+\end{frame}
+
+\begin{frame}
+    \makebox[\textwidth][c]{
+        \includegraphics[width=0.98\paperwidth]{images/jupyter-speed.png}
+    }
+    \note{
+        \begin{itemize}
+            \item The compiled python version gives a slight boost
+            \item The cython verions blows them out of the water
         \end{itemize}
     }
 \end{frame}
