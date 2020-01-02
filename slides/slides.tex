@@ -972,6 +972,7 @@ def pairwise_manhattan_numpy_v4(points: np.ndarray) -> np.ndarray:
     }
     \note<2>{
         \begin{itemize}
+            \item This idea of double broadcasting is very powerful and is the corner stone of why the Conditional Random Field (CRF) (which is a NLP model) I wrote for mead-baseline is so fast.
             \item Now that we are double broadcasting there is no way to express the fact that we can skip the repeated work of calculating the distance between symmetric pairs of points.
         \end{itemize}
     }
@@ -980,26 +981,6 @@ def pairwise_manhattan_numpy_v4(points: np.ndarray) -> np.ndarray:
             \item We are going to revisit Big-O for this implementation
             \item The runtime is still the same, remember the loops are still there, they are just in C not python
             \item We have this itermediate result of size \texttt{[N, N, M]} so our memory usage is higher. $\BigO(N^2M)$
-        \end{itemize}
-    }
-\end{frame}
-
-\begin{frame}<1>[label=micro]
-    \frametitle{Broadcasting Micro Benchmark}
-    \makebox[\textwidth][c]{
-        \includegraphics[width=0.9\paperwidth]{images/microbenchmark-broadcast.png}
-    }
-    \note<1>{
-        \begin{itemize}
-            \item This was a promising implementation in the thread
-            \item Here we can see on a small micro bench mark (4 points of dim 2) that shows a lot of promise
-            \item As I scaled it out speeds weren't meaningfully different/were worse from the single broadcast
-            \item Lets look at why it was worse
-        \end{itemize}
-    }
-    \note<2>{
-        \begin{itemize}
-            \item Due to memory usage this is actually slower than the previous solutions
             \item When you run out of memory you start swapping which involves disk and is therefore super slow
             \item Due to memory usage I could only get this version to work for limited points and only a few dimensions.
             \begin{center}
@@ -1024,9 +1005,23 @@ def pairwise_manhattan_numpy_v4(points: np.ndarray) -> np.ndarray:
     }
 \end{frame}
 
-\againframe<3>{double}
+\begin{frame}<1>[label=micro]
+    \frametitle{Broadcasting Micro Benchmark}
+    \makebox[\textwidth][c]{
+        \includegraphics[width=0.9\paperwidth]{images/microbenchmark-broadcast.png}
+    }
+    \note<1>{
+        \begin{itemize}
+            \item This was a promising implementation in the thread
+            \item Here we can see on a small micro bench mark (4 points of dim 2) that shows a lot of promise
+            \item As I scaled it out speeds weren't meaningfully different/were worse from the single broadcast
+            \item Lets look at why it was worse
+        \end{itemize}
+    }
+\end{frame}
 
-\againframe<2>{micro}
+\againframe<3->{double}
+
 
 \end{subsection} %NumPy
 
