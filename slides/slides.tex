@@ -110,7 +110,7 @@
         \begin{itemize}
             \item Distance if you can only move along the axes
             \item Contrast with euclidean distance where we can move diagonally and go straight there.
-            \item Like you have directions to somewhere in manhattan, you can't smash through a building, you need to drive along the streets
+            \item Like you have directions to somewhere in Manhattan, you can't smash through a building, you need to drive along the streets
         \end{itemize}
     }
 \end{frame}
@@ -246,7 +246,7 @@
             \item \texttt{ndarray} is a multi dimensional array
             \begin{itemize}
                 \item a thing is a scalar
-                \item a list of things is an array (or vector)
+                \item a list of scalars is an array (or vector)
                 \item a list of arrays is a matrix
                 \item a list of matrices is a \texttt{ndarray}
                 \item You can index like \texttt{x[i, j, k]}
@@ -417,7 +417,7 @@ def pairwise_manhattan_python_v2(
     \note{
         \begin{itemize}
             \item The Manhattan distance is a distance metric and it be one mathematically it needs to be symmetrical but we can see why here
-            \item The absoulte difference is the same when reversed so the sum is of the same values to the total sum is the same
+            \item The absolute difference is the same when reversed so the sum is of the same values to the total sum is the same
         \end{itemize}
         \begin{itemize}
             \item in the case where the difference is greater than one
@@ -680,7 +680,7 @@ def pairwise_manhattan_numpy_v3(points: np.ndarray) -> np.ndarray:
     \begin{itemize}
         \item<1-> Vectorization can speed up code
         \item<2-> But what do I do when the shapes don't match?
-        \item<3-> If i want to add a scalar to a vector do I have to copy the scalar into a vector to vectorize it?
+        \item<3-> If I want to add a scalar to a vector do I have to copy the scalar into a vector to vectorize it?
         \item<4-> Broadcasting to the rescue!
     \end{itemize}
     \note<3->{
