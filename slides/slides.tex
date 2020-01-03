@@ -430,7 +430,7 @@ def pairwise_manhattan_python_v2(
 \end{frame}
 
 \begin{frame}
-    \frametitle{Symetric Manhattan Distance}
+    \frametitle{Symmetric Manhattan Distance}
     \begin{center}
     $\md(X, Y) = \sum_i^M | X_i - Y_i |$
     \end{center}
@@ -1001,6 +1001,23 @@ def pairwise_manhattan_numpy_v4(points: np.ndarray) -> np.ndarray:
             \end{tabular}
             \end{center}
             \item This is an exmaple of why it is important to benchmark in a realistic scenario.
+        \end{itemize}
+    }
+\end{frame}
+
+\begin{frame}
+    \makebox[\textwidth][c]{
+        \includegraphics[width=0.9\paperwidth]{images/double-broadcast.jpg}
+    }
+    \note{
+        \begin{itemize}
+            \item This is an example of double broadcasting
+            \item The original points are an $N \text{ x } M$
+            \item The second item is the points expanded to $N \text{ x } 1 \text{ x } M$
+            \item The third item is the points expanded to $1 \text{ x } N \text{ x } M$
+            \item The forth item is the broadcast of $N \text{ x } 1 \text{ x } M \rightarrow N \text{ x } N \text{ x } M$. We can see that the $N$ broadcast results in the duplication of each point into a list of $N$ copies.
+            \item The fifth item is the broadcast of $1 \text{ x } N \text{ x } M \rightarrow N \text{ x } N \text{ x } M$. We can see the the broadcast of initial $1 \rightarrow N$ creates $N$ copies of the sets of points.
+            \item Now that we have matching we can see that the first item the first point vs all other points, the next item is the second point vs the rest and so one.
         \end{itemize}
     }
 \end{frame}
